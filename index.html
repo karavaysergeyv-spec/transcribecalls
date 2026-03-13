@@ -107,6 +107,24 @@
     </section>
   </main>
 
+  <div id="modalOverlay" class="modal-overlay hidden">
+    <div class="modal-window">
+      <div class="modal-header">
+        <div>
+          <h2 id="modalTitle">Деталі</h2>
+          <div id="modalMeta" class="modal-meta"></div>
+        </div>
+        <div class="modal-actions">
+          <button id="copyModalBtn" class="secondary">Копіювати</button>
+          <button id="closeModalBtn" class="modal-close">Закрити</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <pre id="modalContent" class="modal-content"></pre>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="./script.js"></script>
 </body>
 </html>
