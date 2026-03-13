@@ -96,6 +96,10 @@ button.secondary {
   color: #111827;
 }
 
+button:hover {
+  opacity: 0.96;
+}
+
 .summary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -145,7 +149,8 @@ thead {
   background: #f3f4f6;
 }
 
-th, td {
+th,
+td {
   padding: 10px 12px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
