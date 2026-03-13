@@ -67,11 +67,9 @@ function normalizeCorrectValue(value) {
 }
 
 function renderCorrectBadge(value) {
-  const normalized = normalizeCorrectValue(value)
-  if (normalized === 1) {
-    return '<span class="badge badge-yes">1</span>'
-  }
-  return '<span class="badge badge-no">0</span>'
+  return normalizeCorrectValue(value) === 1
+    ? '<span class="badge badge-yes">1</span>'
+    : '<span class="badge badge-no">0</span>'
 }
 
 function tryFormatJson(text) {
