@@ -96,10 +96,6 @@ button.secondary {
   color: #111827;
 }
 
-button:hover {
-  opacity: 0.96;
-}
-
 .summary {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -141,7 +137,7 @@ button:hover {
 table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 2200px;
+  min-width: 2400px;
   table-layout: fixed;
 }
 
@@ -149,8 +145,7 @@ thead {
   background: #f3f4f6;
 }
 
-th,
-td {
+th, td {
   padding: 10px 12px;
   border-bottom: 1px solid #e5e7eb;
   text-align: left;
@@ -226,6 +221,15 @@ th.resizable {
 
 th.resizing {
   background: #e5eefc;
+}
+
+pre.json-block {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 @media (max-width: 1200px) {
