@@ -84,10 +84,10 @@ function renderTable(rows) {
         <td>${escapeHtml(row.case_display ?? '')}</td>
         <td>${escapeHtml(row.queue_display ?? '')}</td>
         <td>
-          <div class="transcription">${escapeHtml(truncateText(row.raw_transcription ?? '', 500))}</div>
+          <div class="transcription">${escapeHtml(escapeHtml(row.raw_transcription ?? ''))}</div>
         </td>
         <td>
-          <div class="transcription">${escapeHtml(truncateText(row.processed_transcription ?? '', 500))}</div>
+          <div class="transcription">${escapeHtml(escapeHtml(row.processed_transcription ?? ''))}</div>
         </td>
       </tr>
     `
