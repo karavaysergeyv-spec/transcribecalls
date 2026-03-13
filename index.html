@@ -1,28 +1,28 @@
 <!doctype html>
-<html lang="ru">
+<html lang="uk">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calls Dashboard</title>
+  <title>Панель дзвінків</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
   <header class="topbar">
     <div>
-      <h1>Calls Dashboard</h1>
-      <p class="subtitle">Данные из Supabase / calls_view</p>
+      <h1>Панель дзвінків</h1>
+      <p class="subtitle">Дані із Supabase / public.calls_view</p>
     </div>
   </header>
 
   <main class="container">
     <section class="panel filters">
       <div class="field">
-        <label for="searchInput">Поиск по номеру / категории / очереди</label>
-        <input id="searchInput" type="text" placeholder="Например: 380, sales, support" />
+        <label for="searchInput">Пошук по номеру, категорії, черзі або транскрипції</label>
+        <input id="searchInput" type="text" placeholder="Наприклад: 380, підтримка, рекламація" />
       </div>
 
       <div class="field">
-        <label for="dateFrom">Дата от</label>
+        <label for="dateFrom">Дата від</label>
         <input id="dateFrom" type="date" />
       </div>
 
@@ -32,7 +32,16 @@
       </div>
 
       <div class="field">
-        <label for="limitSelect">Показывать записей</label>
+        <label for="viewFilter">Ознака calls_view</label>
+        <select id="viewFilter">
+          <option value="">Усі</option>
+          <option value="1">Тільки 1</option>
+          <option value="0">Тільки 0</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="limitSelect">Кількість рядків</label>
         <select id="limitSelect">
           <option value="20">20</option>
           <option value="50" selected>50</option>
@@ -42,51 +51,57 @@
       </div>
 
       <div class="actions">
-        <button id="loadBtn">Загрузить</button>
-        <button id="resetBtn" class="secondary">Сбросить</button>
+        <button id="loadBtn">Завантажити</button>
+        <button id="resetBtn" class="secondary">Скинути</button>
       </div>
     </section>
 
     <section class="panel summary">
       <div class="summary-item">
-        <span class="summary-label">Всего строк</span>
+        <span class="summary-label">Усього рядків</span>
         <span class="summary-value" id="totalCount">0</span>
       </div>
       <div class="summary-item">
-        <span class="summary-label">Средняя длительность</span>
+        <span class="summary-label">Середня тривалість</span>
         <span class="summary-value" id="avgDuration">0 сек</span>
       </div>
       <div class="summary-item">
-        <span class="summary-label">Средняя оценка</span>
+        <span class="summary-label">Середня оцінка</span>
         <span class="summary-value" id="avgScore">—</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">calls_view = 1</span>
+        <span class="summary-value" id="viewedCount">0</span>
       </div>
     </section>
 
     <section class="panel">
-      <div id="status" class="status">Готово к загрузке</div>
+      <div id="status" class="status">Готово до завантаження</div>
+
       <div class="table-wrap">
         <table id="callsTable">
           <thead>
-  <tr>
-    <th>Дата</th>
-    <th>Від</th>
-    <th>куди</th>
-    <th>Трив.</th>
-    <th>Оцінка оператора</th>
-    <th>Категорія</th>
-    <th>Підкатегорія</th>
-    <th>Операція</th>
-    <th>Кейс</th>
-    <th>Очередь</th>
-    <th>Діалог</th>
-    <th>Результат</th>
-  </tr>
-</thead>
-<tbody id="callsBody">
-  <tr>
-    <td colspan="12" class="empty">Нет данных</td>
-  </tr>
-</tbody>
+            <tr>
+              <th>Дата</th>
+              <th>Звідки</th>
+              <th>Куди</th>
+              <th>Тривалість</th>
+              <th>Оцінка</th>
+              <th>Переглянуто</th>
+              <th>Категорія</th>
+              <th>Підкатегорія</th>
+              <th>Код операції</th>
+              <th>Кейс</th>
+              <th>Черга</th>
+              <th>Raw transcription</th>
+              <th>Processed transcription</th>
+            </tr>
+          </thead>
+          <tbody id="callsBody">
+            <tr>
+              <td colspan="13" class="empty">Немає даних</td>
+            </tr>
+          </tbody>
         </table>
       </div>
     </section>
