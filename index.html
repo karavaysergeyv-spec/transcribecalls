@@ -10,7 +10,7 @@
   <header class="topbar">
     <div>
       <h1>Панель дзвінків</h1>
-      <p class="subtitle">Дані із Supabase / public.calls_view</p>
+      <p class="subtitle">Дані із Supabase / calls_view</p>
     </div>
   </header>
 
@@ -32,8 +32,8 @@
       </div>
 
       <div class="field">
-        <label for="viewFilter">Ознака calls_view</label>
-        <select id="viewFilter">
+        <label for="correctFilter">Ознака is_correct</label>
+        <select id="correctFilter">
           <option value="">Усі</option>
           <option value="1">Тільки 1</option>
           <option value="0">Тільки 0</option>
@@ -70,8 +70,8 @@
         <span class="summary-value" id="avgScore">—</span>
       </div>
       <div class="summary-item">
-        <span class="summary-label">calls_view = 1</span>
-        <span class="summary-value" id="viewedCount">0</span>
+        <span class="summary-label">is_correct = 1</span>
+        <span class="summary-value" id="correctCount">0</span>
       </div>
     </section>
 
@@ -87,7 +87,7 @@
               <th>Куди</th>
               <th>Тривалість</th>
               <th>Оцінка</th>
-              <th>Переглянуто</th>
+              <th>is_correct</th>
               <th>Категорія</th>
               <th>Підкатегорія</th>
               <th>Код операції</th>
