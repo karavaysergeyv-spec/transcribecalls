@@ -64,14 +64,13 @@ function renderTable(rows) {
   if (!rows || rows.length === 0) {
     callsBodyEl.innerHTML = `
       <tr>
-        <td colspan="11" class="empty">Нет данных</td>
+        <td colspan="12" class="empty">Нет данных</td>
       </tr>
     `
     return
   }
 
   callsBodyEl.innerHTML = rows.map(row => {
-    const transcription = row.processed_transcription || row.raw_transcription || ''
     return `
       <tr>
         <td>${escapeHtml(formatDateTime(row.created_on))}</td>
@@ -85,7 +84,10 @@ function renderTable(rows) {
         <td>${escapeHtml(row.case_display ?? '')}</td>
         <td>${escapeHtml(row.queue_display ?? '')}</td>
         <td>
-          <div class="transcription">${escapeHtml(truncateText(transcription, 500))}</div>
+          <div class="transcription">${escapeHtml(truncateText(row.raw_transcription ?? '', 500))}</div>
+        </td>
+        <td>
+          <div class="transcription">${escapeHtml(truncateText(row.processed_transcription ?? '', 500))}</div>
         </td>
       </tr>
     `
