@@ -21,8 +21,30 @@ const loadBtnEl = document.getElementById('loadBtn')
 const resetBtnEl = document.getElementById('resetBtn')
 const callsTableEl = document.getElementById('callsTable')
 
+const modalOverlayEl = document.getElementById('modalOverlay')
+const modalTitleEl = document.getElementById('modalTitle')
+const modalMetaEl = document.getElementById('modalMeta')
+const modalContentEl = document.getElementById('modalContent')
+const closeModalBtnEl = document.getElementById('closeModalBtn')
+const copyModalBtnEl = document.getElementById('copyModalBtn')
+
+let currentModalText = ''
+
 loadBtnEl.addEventListener('click', loadCalls)
 resetBtnEl.addEventListener('click', resetFilters)
+closeModalBtnEl.addEventListener('click', closeModal)
+copyModalBtnEl.addEventListener('click', copyModalText)
+modalOverlayEl.addEventListener('click', (e) => {
+  if (e.target === modalOverlayEl) {
+    closeModal()
+  }
+})
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && !modalOverlayEl.classList.contains('hidden')) {
+    closeModal()
+  }
+})
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message
@@ -90,6 +112,64 @@ function tryFormatJson(text) {
   }
 }
 
+function truncateText(text, maxLength = 280) {
+  if (!text) return ''
+  const s = String(text)
+  if (s.length <= maxLength) return s
+  return s.slice(0, maxLength) + '...'
+}
+
+function openModal(title, meta, content) {
+  currentModalText = content || ''
+  modalTitleEl.textContent = title
+  modalMetaEl.textContent = meta || ''
+  modalContentEl.textContent = content || ''
+  modalOverlayEl.classList.remove('hidden')
+  document.body.style.overflow = 'hidden'
+}
+
+function closeModal() {
+  modalOverlayEl.classList.add('hidden')
+  document.body.style.overflow = ''
+}
+
+async function copyModalText() {
+  try {
+    await navigator.clipboard.writeText(currentModalText || '')
+    copyModalBtnEl.textContent = 'Скопійовано'
+    setTimeout(() => {
+      copyModalBtnEl.textContent = 'Копіювати'
+    }, 1200)
+  } catch {
+    copyModalBtnEl.textContent = 'Не вдалося'
+    setTimeout(() => {
+      copyModalBtnEl.textContent = 'Копіювати'
+    }, 1200)
+  }
+}
+
+function renderTextCell(text, type, row) {
+  const fullText = type === 'processed'
+    ? tryFormatJson(text ?? '')
+    : (text ?? '')
+
+  const preview = truncateText(fullText, 280)
+  const meta = `${formatDateTime(row.created_on)} | ${row.from_number ?? ''} → ${row.to_number ?? ''}`
+
+  return `
+    <div class="transcription">${escapeHtml(preview)}</div>
+    <button
+      class="open-full-btn"
+      data-open-modal="1"
+      data-modal-title="${escapeHtml(type === 'processed' ? 'Processed transcription' : 'Raw transcription')}"
+      data-modal-meta="${escapeHtml(meta)}"
+      data-modal-content="${escapeHtml(fullText)}"
+    >
+      Відкрити повністю
+    </button>
+  `
+}
+
 function renderTable(rows) {
   if (!rows || rows.length === 0) {
     callsBodyEl.innerHTML = `
@@ -113,10 +193,26 @@ function renderTable(rows) {
       <td>${escapeHtml(row.case_operation_code ?? '')}</td>
       <td>${escapeHtml(row.case_display ?? '')}</td>
       <td>${escapeHtml(row.queue_display ?? '')}</td>
-      <td><div class="transcription">${escapeHtml(row.raw_transcription ?? '')}</div></td>
-      <td><pre class="json-block">${escapeHtml(tryFormatJson(row.processed_transcription ?? ''))}</pre></td>
+      <td>${renderTextCell(row.raw_transcription, 'raw', row)}</td>
+      <td>${renderTextCell(row.processed_transcription, 'processed', row)}</td>
     </tr>
   `).join('')
+
+  bindModalButtons()
+}
+
+function bindModalButtons() {
+  const buttons = callsBodyEl.querySelectorAll('[data-open-modal="1"]')
+  buttons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const title = btn.dataset.modalTitle || 'Деталі'
+      const meta = btn.dataset.modalMeta || ''
+      const content = btn.dataset.modalContent || ''
+      const textarea = document.createElement('textarea')
+      textarea.innerHTML = content
+      openModal(title, meta, textarea.value)
+    })
+  })
 }
 
 function renderSummary(rows) {
