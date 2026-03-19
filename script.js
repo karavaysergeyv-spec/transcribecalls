@@ -65,7 +65,7 @@ document.addEventListener('keydown', (e) => {
 })
 
 window.addEventListener('resize', () => {
-  syncTopScrollbar()
+  requestAnimationFrame(syncTopScrollbar)
 })
 
 topScrollWrapEl.addEventListener('scroll', () => {
@@ -202,8 +202,9 @@ function syncTopScrollbar() {
 
   topScrollInnerEl.style.width = `${tableWidth}px`
 
-  if (tableWidth > containerWidth) {
+  if (tableWidth > containerWidth + 2) {
     topScrollWrapEl.classList.add('visible')
+    topScrollWrapEl.scrollLeft = tableWrapEl.scrollLeft
   } else {
     topScrollWrapEl.classList.remove('visible')
     topScrollWrapEl.scrollLeft = 0
@@ -306,7 +307,8 @@ function renderTable(rows) {
         <td colspan="13" class="empty">Немає даних</td>
       </tr>
     `
-    syncTopScrollbar()
+    bindModalButtons()
+    requestAnimationFrame(syncTopScrollbar)
     return
   }
 
