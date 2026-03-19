@@ -13,6 +13,7 @@ const avgScoreEl = document.getElementById('avgScore')
 const correctCountEl = document.getElementById('correctCount')
 
 const searchInputEl = document.getElementById('searchInput')
+const createdBySelectEl = document.getElementById('createdBySelect')
 const dateFromEl = document.getElementById('dateFrom')
 const dateToEl = document.getElementById('dateTo')
 const correctFilterEl = document.getElementById('correctFilter')
@@ -29,11 +30,13 @@ const closeModalBtnEl = document.getElementById('closeModalBtn')
 const copyModalBtnEl = document.getElementById('copyModalBtn')
 
 let currentModalText = ''
+let operatorsLoaded = false
 
 loadBtnEl.addEventListener('click', loadCalls)
 resetBtnEl.addEventListener('click', resetFilters)
 closeModalBtnEl.addEventListener('click', closeModal)
 copyModalBtnEl.addEventListener('click', copyModalText)
+
 modalOverlayEl.addEventListener('click', (e) => {
   if (e.target === modalOverlayEl) {
     closeModal()
@@ -44,6 +47,10 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && !modalOverlayEl.classList.contains('hidden')) {
     closeModal()
   }
+
+  if (e.key === 'Enter' && document.activeElement?.tagName !== 'BUTTON') {
+    loadCalls()
+  }
 })
 
 function setStatus(message, isError = false) {
@@ -53,6 +60,7 @@ function setStatus(message, isError = false) {
 
 function resetFilters() {
   searchInputEl.value = ''
+  createdBySelectEl.value = ''
   dateFromEl.value = ''
   dateToEl.value = ''
   correctFilterEl.value = ''
@@ -119,6 +127,43 @@ function truncateText(text, maxLength = 280) {
   return s.slice(0, maxLength) + '...'
 }
 
+async function loadCreatedByOptions() {
+  try {
+    const { data, error } = await supabase
+      .from('calls_view')
+      .select('created_by')
+      .not('created_by', 'is', null)
+      .order('created_by', { ascending: true })
+      .limit(1000)
+
+    if (error) {
+      throw error
+    }
+
+    const uniqueOperators = [...new Set(
+      (data || [])
+        .map(item => (item.created_by ?? '').toString().trim())
+        .filter(Boolean)
+    )]
+
+    const currentValue = createdBySelectEl.value
+
+    createdBySelectEl.innerHTML =
+      '<option value="">Усі оператори</option>' +
+      uniqueOperators
+        .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+        .join('')
+
+    if (uniqueOperators.includes(currentValue)) {
+      createdBySelectEl.value = currentValue
+    }
+
+    operatorsLoaded = true
+  } catch (err) {
+    console.error('Ошибка загрузки операторов', err)
+  }
+}
+
 function openModal(title, meta, content) {
   currentModalText = content || ''
   modalTitleEl.textContent = title
@@ -154,7 +199,7 @@ function renderTextCell(text, type, row) {
     : (text ?? '')
 
   const preview = truncateText(fullText, 280)
-  const meta = `${formatDateTime(row.created_on)} | ${row.from_number ?? ''} → ${row.to_number ?? ''}`
+  const meta = `${formatDateTime(row.created_on)} | ${row.created_by ?? '—'} | ${row.from_number ?? ''} → ${row.to_number ?? ''}`
 
   return `
     <div class="transcription">${escapeHtml(preview)}</div>
@@ -174,7 +219,7 @@ function renderTable(rows) {
   if (!rows || rows.length === 0) {
     callsBodyEl.innerHTML = `
       <tr>
-        <td colspan="13" class="empty">Немає даних</td>
+        <td colspan="14" class="empty">Немає даних</td>
       </tr>
     `
     return
@@ -183,6 +228,7 @@ function renderTable(rows) {
   callsBodyEl.innerHTML = rows.map(row => `
     <tr>
       <td>${escapeHtml(formatDateTime(row.created_on))}</td>
+      <td>${escapeHtml(row.created_by ?? '')}</td>
       <td>${escapeHtml(row.from_number ?? '')}</td>
       <td>${escapeHtml(row.to_number ?? '')}</td>
       <td>${escapeHtml(row.duration_seconds ?? '')}</td>
@@ -244,6 +290,7 @@ function renderSummary(rows) {
 
 function rowMatchesSearch(row, search) {
   const haystack = [
+    row.created_by,
     row.from_number,
     row.to_number,
     row.case_category,
@@ -263,10 +310,15 @@ function rowMatchesSearch(row, search) {
 
 async function loadCalls() {
   try {
+    if (!operatorsLoaded) {
+      await loadCreatedByOptions()
+    }
+
     setStatus('Завантаження даних...')
 
     const limit = Number(limitSelectEl.value) || 50
     const search = searchInputEl.value.trim().toLowerCase()
+    const createdByFilter = createdBySelectEl.value.trim()
     const dateFrom = dateFromEl.value
     const dateTo = dateToEl.value
     const correctFilter = correctFilterEl.value
@@ -275,6 +327,7 @@ async function loadCalls() {
       .from('calls_view')
       .select(`
         created_on,
+        created_by,
         from_number,
         to_number,
         duration_seconds,
@@ -301,6 +354,10 @@ async function loadCalls() {
 
     if (correctFilter === '1' || correctFilter === '0') {
       query = query.eq('is_correct', Number(correctFilter))
+    }
+
+    if (createdByFilter) {
+      query = query.eq('created_by', createdByFilter)
     }
 
     const { data, error } = await query
