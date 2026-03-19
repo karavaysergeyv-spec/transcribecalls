@@ -16,9 +16,16 @@
 
   <main class="container">
     <section class="panel filters">
+      <div class="field field-search">
+        <label for="searchInput">Пошук по номеру, оператору, категорії, черзі або транскрипції</label>
+        <input id="searchInput" type="text" placeholder="Наприклад: 380, Anastasiia, підтримка, рекламація" />
+      </div>
+
       <div class="field">
-        <label for="searchInput">Пошук по номеру, категорії, черзі або транскрипції</label>
-        <input id="searchInput" type="text" placeholder="Наприклад: 380, підтримка, рекламація" />
+        <label for="createdBySelect">Оператор (created_by)</label>
+        <select id="createdBySelect">
+          <option value="">Усі оператори</option>
+        </select>
       </div>
 
       <div class="field">
@@ -83,6 +90,7 @@
           <thead>
             <tr>
               <th>Дата</th>
+              <th>Оператор</th>
               <th>Звідки</th>
               <th>Куди</th>
               <th>Тривалість</th>
@@ -99,7 +107,7 @@
           </thead>
           <tbody id="callsBody">
             <tr>
-              <td colspan="13" class="empty">Немає даних</td>
+              <td colspan="14" class="empty">Немає даних</td>
             </tr>
           </tbody>
         </table>
