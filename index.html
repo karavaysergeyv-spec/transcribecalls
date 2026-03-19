@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Панель дзвінків2</title>
+  <title>Панель дзвінків</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -17,8 +17,12 @@
   <main class="container">
     <section class="panel filters">
       <div class="field field-search">
-        <label for="searchInput">Пошук по номеру, оператору, категорії, черзі або транскрипції</label>
-        <input id="searchInput" type="text" placeholder="Наприклад: 380, Anastasiia, підтримка, рекламація" />
+        <label for="searchInput">Загальний пошук</label>
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="Номер, оператор, категорія, черга, транскрипція"
+        />
       </div>
 
       <div class="field">
@@ -26,6 +30,61 @@
         <select id="createdBySelect">
           <option value="">Усі оператори</option>
         </select>
+      </div>
+
+      <div class="field">
+        <label for="fromCodeInput">Код оператора from_number</label>
+        <input
+          id="fromCodeInput"
+          type="text"
+          placeholder="Наприклад: 099, 066, 097"
+          maxlength="3"
+        />
+      </div>
+
+      <div class="field">
+        <label for="caseCategoryInput">case_category</label>
+        <input
+          id="caseCategoryInput"
+          type="text"
+          placeholder="Наприклад: Перевірка платежу"
+        />
+      </div>
+
+      <div class="field">
+        <label for="caseSubcategoryInput">case_subcategory</label>
+        <input
+          id="caseSubcategoryInput"
+          type="text"
+          placeholder="Наприклад: Успішний платіж"
+        />
+      </div>
+
+      <div class="field">
+        <label for="caseOperationCodeInput">case_operation_code</label>
+        <input
+          id="caseOperationCodeInput"
+          type="text"
+          placeholder="Наприклад: 1018018758"
+        />
+      </div>
+
+      <div class="field">
+        <label for="caseDisplayInput">case_display</label>
+        <input
+          id="caseDisplayInput"
+          type="text"
+          placeholder="Наприклад: C2C"
+        />
+      </div>
+
+      <div class="field">
+        <label for="queueDisplayInput">queue_display</label>
+        <input
+          id="queueDisplayInput"
+          type="text"
+          placeholder="Наприклад: Оператори call center"
+        />
       </div>
 
       <div class="field">
@@ -69,10 +128,6 @@
         <span class="summary-value" id="totalCount">0</span>
       </div>
       <div class="summary-item">
-        <span class="summary-label">Середня тривалість</span>
-        <span class="summary-value" id="avgDuration">0 сек</span>
-      </div>
-      <div class="summary-item">
         <span class="summary-label">Середня оцінка</span>
         <span class="summary-value" id="avgScore">—</span>
       </div>
@@ -93,7 +148,6 @@
               <th>Оператор</th>
               <th>Звідки</th>
               <th>Куди</th>
-              <th>Тривалість</th>
               <th>Оцінка</th>
               <th>is_correct</th>
               <th>Категорія</th>
@@ -107,7 +161,7 @@
           </thead>
           <tbody id="callsBody">
             <tr>
-              <td colspan="14" class="empty">Немає даних</td>
+              <td colspan="13" class="empty">Немає даних</td>
             </tr>
           </tbody>
         </table>
