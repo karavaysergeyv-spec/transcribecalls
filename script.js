@@ -28,6 +28,9 @@ const limitSelectEl = document.getElementById('limitSelect')
 const loadBtnEl = document.getElementById('loadBtn')
 const resetBtnEl = document.getElementById('resetBtn')
 const callsTableEl = document.getElementById('callsTable')
+const tableWrapEl = document.getElementById('tableWrap')
+const topScrollWrapEl = document.getElementById('topScrollWrap')
+const topScrollInnerEl = document.getElementById('topScrollInner')
 
 const modalOverlayEl = document.getElementById('modalOverlay')
 const modalTitleEl = document.getElementById('modalTitle')
@@ -38,6 +41,7 @@ const copyModalBtnEl = document.getElementById('copyModalBtn')
 
 let currentModalText = ''
 let operatorsLoaded = false
+let scrollSyncLocked = false
 
 loadBtnEl.addEventListener('click', loadCalls)
 resetBtnEl.addEventListener('click', resetFilters)
@@ -58,6 +62,24 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && document.activeElement?.tagName !== 'BUTTON') {
     loadCalls()
   }
+})
+
+window.addEventListener('resize', () => {
+  syncTopScrollbar()
+})
+
+topScrollWrapEl.addEventListener('scroll', () => {
+  if (scrollSyncLocked) return
+  scrollSyncLocked = true
+  tableWrapEl.scrollLeft = topScrollWrapEl.scrollLeft
+  scrollSyncLocked = false
+})
+
+tableWrapEl.addEventListener('scroll', () => {
+  if (scrollSyncLocked) return
+  scrollSyncLocked = true
+  topScrollWrapEl.scrollLeft = tableWrapEl.scrollLeft
+  scrollSyncLocked = false
 })
 
 function setStatus(message, isError = false) {
@@ -174,6 +196,21 @@ function extractTotalScore(processed) {
   return Number.isFinite(n) ? n : null
 }
 
+function syncTopScrollbar() {
+  const tableWidth = callsTableEl.scrollWidth
+  const containerWidth = tableWrapEl.clientWidth
+
+  topScrollInnerEl.style.width = `${tableWidth}px`
+
+  if (tableWidth > containerWidth) {
+    topScrollWrapEl.classList.add('visible')
+  } else {
+    topScrollWrapEl.classList.remove('visible')
+    topScrollWrapEl.scrollLeft = 0
+    tableWrapEl.scrollLeft = 0
+  }
+}
+
 async function loadCreatedByOptions() {
   try {
     const { data, error } = await supabase
@@ -269,6 +306,7 @@ function renderTable(rows) {
         <td colspan="13" class="empty">Немає даних</td>
       </tr>
     `
+    syncTopScrollbar()
     return
   }
 
@@ -291,6 +329,7 @@ function renderTable(rows) {
   `).join('')
 
   bindModalButtons()
+  requestAnimationFrame(syncTopScrollbar)
 }
 
 function bindModalButtons() {
@@ -464,6 +503,7 @@ async function loadCalls() {
     setStatus(`Завантажено записів: ${rows.length}`)
 
     setupResizableColumns()
+    requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
     renderTable([])
@@ -496,12 +536,14 @@ function setupResizableColumns() {
     const onMouseMove = (e) => {
       const newWidth = startWidth + (e.clientX - startX)
       th.style.width = `${Math.max(newWidth, 80)}px`
+      requestAnimationFrame(syncTopScrollbar)
     }
 
     const onMouseUp = () => {
       th.classList.remove('resizing')
       document.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('mouseup', onMouseUp)
+      requestAnimationFrame(syncTopScrollbar)
     }
 
     handle.addEventListener('mousedown', (e) => {
