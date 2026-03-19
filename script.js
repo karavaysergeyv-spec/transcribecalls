@@ -145,29 +145,33 @@ function truncateText(text, maxLength = 280) {
 function normalizePhoneForPrefix(phone) {
   const digits = String(phone ?? '').replace(/\D/g, '')
   if (!digits) return ''
+
   if (digits.startsWith('380') && digits.length >= 12) {
     return '0' + digits.slice(3)
   }
+
   return digits
 }
 
 function extractTotalScore(processed) {
-  if (!processed) return null
-
-  try {
-    const obj = typeof processed === 'string'
-      ? JSON.parse(processed)
-      : processed
-
-    const score = obj?.total_score
-
-    if (score === undefined || score === null) return null
-
-    const n = Number(score)
-    return Number.isFinite(n) ? n : null
-  } catch {
+  if (processed === null || processed === undefined || processed === '') {
     return null
   }
+
+  let obj = processed
+
+  if (typeof processed === 'string') {
+    try {
+      obj = JSON.parse(processed)
+    } catch {
+      return null
+    }
+  }
+
+  const score = obj?.total_score
+  const n = Number(score)
+
+  return Number.isFinite(n) ? n : null
 }
 
 async function loadCreatedByOptions() {
@@ -357,6 +361,8 @@ async function loadCalls() {
     const caseOperationCodeFilter = caseOperationCodeInputEl.value.trim()
     const caseDisplayFilter = caseDisplayInputEl.value.trim()
     const queueDisplayFilter = queueDisplayInputEl.value.trim()
+    const totalScoreMinRaw = totalScoreMinEl.value.trim()
+    const totalScoreMaxRaw = totalScoreMaxEl.value.trim()
     const dateFrom = dateFromEl.value
     const dateTo = dateToEl.value
     const correctFilter = correctFilterEl.value
@@ -432,17 +438,17 @@ async function loadCalls() {
       })
     }
 
-    const minScore = Number(totalScoreMinEl.value)
-    const maxScore = Number(totalScoreMaxEl.value)
+    const minScore = totalScoreMinRaw === '' ? null : Number(totalScoreMinRaw)
+    const maxScore = totalScoreMaxRaw === '' ? null : Number(totalScoreMaxRaw)
 
-    if (!Number.isNaN(minScore) && totalScoreMinEl.value !== '') {
+    if (minScore !== null && Number.isFinite(minScore)) {
       rows = rows.filter(row => {
         const score = extractTotalScore(row.processed_transcription)
         return score !== null && score >= minScore
       })
     }
 
-    if (!Number.isNaN(maxScore) && totalScoreMaxEl.value !== '') {
+    if (maxScore !== null && Number.isFinite(maxScore)) {
       rows = rows.filter(row => {
         const score = extractTotalScore(row.processed_transcription)
         return score !== null && score <= maxScore
