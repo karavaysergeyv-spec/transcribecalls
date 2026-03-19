@@ -19,6 +19,8 @@ const caseSubcategoryInputEl = document.getElementById('caseSubcategoryInput')
 const caseOperationCodeInputEl = document.getElementById('caseOperationCodeInput')
 const caseDisplayInputEl = document.getElementById('caseDisplayInput')
 const queueDisplayInputEl = document.getElementById('queueDisplayInput')
+const totalScoreMinEl = document.getElementById('totalScoreMin')
+const totalScoreMaxEl = document.getElementById('totalScoreMax')
 const dateFromEl = document.getElementById('dateFrom')
 const dateToEl = document.getElementById('dateTo')
 const correctFilterEl = document.getElementById('correctFilter')
@@ -72,6 +74,8 @@ function resetFilters() {
   caseOperationCodeInputEl.value = ''
   caseDisplayInputEl.value = ''
   queueDisplayInputEl.value = ''
+  totalScoreMinEl.value = ''
+  totalScoreMaxEl.value = ''
   dateFromEl.value = ''
   dateToEl.value = ''
   correctFilterEl.value = ''
@@ -145,6 +149,25 @@ function normalizePhoneForPrefix(phone) {
     return '0' + digits.slice(3)
   }
   return digits
+}
+
+function extractTotalScore(processed) {
+  if (!processed) return null
+
+  try {
+    const obj = typeof processed === 'string'
+      ? JSON.parse(processed)
+      : processed
+
+    const score = obj?.total_score
+
+    if (score === undefined || score === null) return null
+
+    const n = Number(score)
+    return Number.isFinite(n) ? n : null
+  } catch {
+    return null
+  }
 }
 
 async function loadCreatedByOptions() {
@@ -406,6 +429,23 @@ async function loadCalls() {
       rows = rows.filter(row => {
         const normalized = normalizePhoneForPrefix(row.from_number)
         return normalized.startsWith(fromCodeFilter)
+      })
+    }
+
+    const minScore = Number(totalScoreMinEl.value)
+    const maxScore = Number(totalScoreMaxEl.value)
+
+    if (!Number.isNaN(minScore) && totalScoreMinEl.value !== '') {
+      rows = rows.filter(row => {
+        const score = extractTotalScore(row.processed_transcription)
+        return score !== null && score >= minScore
+      })
+    }
+
+    if (!Number.isNaN(maxScore) && totalScoreMaxEl.value !== '') {
+      rows = rows.filter(row => {
+        const score = extractTotalScore(row.processed_transcription)
+        return score !== null && score <= maxScore
       })
     }
 
