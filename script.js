@@ -8,12 +8,17 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
 const statusEl = document.getElementById('status')
 const callsBodyEl = document.getElementById('callsBody')
 const totalCountEl = document.getElementById('totalCount')
-const avgDurationEl = document.getElementById('avgDuration')
 const avgScoreEl = document.getElementById('avgScore')
 const correctCountEl = document.getElementById('correctCount')
 
 const searchInputEl = document.getElementById('searchInput')
 const createdBySelectEl = document.getElementById('createdBySelect')
+const fromCodeInputEl = document.getElementById('fromCodeInput')
+const caseCategoryInputEl = document.getElementById('caseCategoryInput')
+const caseSubcategoryInputEl = document.getElementById('caseSubcategoryInput')
+const caseOperationCodeInputEl = document.getElementById('caseOperationCodeInput')
+const caseDisplayInputEl = document.getElementById('caseDisplayInput')
+const queueDisplayInputEl = document.getElementById('queueDisplayInput')
 const dateFromEl = document.getElementById('dateFrom')
 const dateToEl = document.getElementById('dateTo')
 const correctFilterEl = document.getElementById('correctFilter')
@@ -61,6 +66,12 @@ function setStatus(message, isError = false) {
 function resetFilters() {
   searchInputEl.value = ''
   createdBySelectEl.value = ''
+  fromCodeInputEl.value = ''
+  caseCategoryInputEl.value = ''
+  caseSubcategoryInputEl.value = ''
+  caseOperationCodeInputEl.value = ''
+  caseDisplayInputEl.value = ''
+  queueDisplayInputEl.value = ''
   dateFromEl.value = ''
   dateToEl.value = ''
   correctFilterEl.value = ''
@@ -127,6 +138,15 @@ function truncateText(text, maxLength = 280) {
   return s.slice(0, maxLength) + '...'
 }
 
+function normalizePhoneForPrefix(phone) {
+  const digits = String(phone ?? '').replace(/\D/g, '')
+  if (!digits) return ''
+  if (digits.startsWith('380') && digits.length >= 12) {
+    return '0' + digits.slice(3)
+  }
+  return digits
+}
+
 async function loadCreatedByOptions() {
   try {
     const { data, error } = await supabase
@@ -160,7 +180,7 @@ async function loadCreatedByOptions() {
 
     operatorsLoaded = true
   } catch (err) {
-    console.error('Ошибка загрузки операторов', err)
+    console.error('Помилка завантаження операторів', err)
   }
 }
 
@@ -219,7 +239,7 @@ function renderTable(rows) {
   if (!rows || rows.length === 0) {
     callsBodyEl.innerHTML = `
       <tr>
-        <td colspan="14" class="empty">Немає даних</td>
+        <td colspan="13" class="empty">Немає даних</td>
       </tr>
     `
     return
@@ -231,7 +251,6 @@ function renderTable(rows) {
       <td>${escapeHtml(row.created_by ?? '')}</td>
       <td>${escapeHtml(row.from_number ?? '')}</td>
       <td>${escapeHtml(row.to_number ?? '')}</td>
-      <td>${escapeHtml(row.duration_seconds ?? '')}</td>
       <td>${escapeHtml(row.operator_score ?? '')}</td>
       <td>${renderCorrectBadge(row.is_correct)}</td>
       <td>${escapeHtml(row.case_category ?? '')}</td>
@@ -263,16 +282,6 @@ function bindModalButtons() {
 
 function renderSummary(rows) {
   totalCountEl.textContent = rows.length
-
-  const durations = rows
-    .map(r => toNumberOrNull(r.duration_seconds))
-    .filter(v => v !== null)
-
-  const avgDuration = durations.length
-    ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
-    : 0
-
-  avgDurationEl.textContent = `${avgDuration} сек`
 
   const scores = rows
     .map(r => toNumberOrNull(r.operator_score))
@@ -319,6 +328,12 @@ async function loadCalls() {
     const limit = Number(limitSelectEl.value) || 50
     const search = searchInputEl.value.trim().toLowerCase()
     const createdByFilter = createdBySelectEl.value.trim()
+    const fromCodeFilter = fromCodeInputEl.value.trim()
+    const caseCategoryFilter = caseCategoryInputEl.value.trim()
+    const caseSubcategoryFilter = caseSubcategoryInputEl.value.trim()
+    const caseOperationCodeFilter = caseOperationCodeInputEl.value.trim()
+    const caseDisplayFilter = caseDisplayInputEl.value.trim()
+    const queueDisplayFilter = queueDisplayInputEl.value.trim()
     const dateFrom = dateFromEl.value
     const dateTo = dateToEl.value
     const correctFilter = correctFilterEl.value
@@ -330,7 +345,6 @@ async function loadCalls() {
         created_by,
         from_number,
         to_number,
-        duration_seconds,
         operator_score,
         case_category,
         case_subcategory,
@@ -360,6 +374,26 @@ async function loadCalls() {
       query = query.eq('created_by', createdByFilter)
     }
 
+    if (caseCategoryFilter) {
+      query = query.ilike('case_category', `%${caseCategoryFilter}%`)
+    }
+
+    if (caseSubcategoryFilter) {
+      query = query.ilike('case_subcategory', `%${caseSubcategoryFilter}%`)
+    }
+
+    if (caseOperationCodeFilter) {
+      query = query.ilike('case_operation_code', `%${caseOperationCodeFilter}%`)
+    }
+
+    if (caseDisplayFilter) {
+      query = query.ilike('case_display', `%${caseDisplayFilter}%`)
+    }
+
+    if (queueDisplayFilter) {
+      query = query.ilike('queue_display', `%${queueDisplayFilter}%`)
+    }
+
     const { data, error } = await query
 
     if (error) {
@@ -367,6 +401,13 @@ async function loadCalls() {
     }
 
     let rows = data || []
+
+    if (fromCodeFilter) {
+      rows = rows.filter(row => {
+        const normalized = normalizePhoneForPrefix(row.from_number)
+        return normalized.startsWith(fromCodeFilter)
+      })
+    }
 
     if (search) {
       rows = rows.filter(row => rowMatchesSearch(row, search))
