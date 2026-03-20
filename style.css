@@ -131,49 +131,6 @@ button:hover {
   color: #374151;
 }
 
-.top-scroll-wrap {
-  display: none;
-  overflow-x: auto;
-  overflow-y: hidden;
-  height: 20px;
-  margin-bottom: 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 10px;
-  background: linear-gradient(to bottom, #f9fafb, #eef2f7);
-}
-
-.top-scroll-wrap.visible {
-  display: block;
-}
-
-.top-scroll-inner {
-  height: 1px;
-}
-
-.top-scroll-wrap::-webkit-scrollbar {
-  height: 16px;
-}
-
-.top-scroll-wrap::-webkit-scrollbar-track {
-  background: #e5e7eb;
-  border-radius: 999px;
-}
-
-.top-scroll-wrap::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border-radius: 999px;
-  border: 2px solid #e5e7eb;
-}
-
-.top-scroll-wrap::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-.top-scroll-wrap {
-  scrollbar-color: #94a3b8 #e5e7eb;
-  scrollbar-width: auto;
-}
-
 .table-wrap {
   overflow: auto;
   border: 1px solid #e5e7eb;
@@ -229,22 +186,24 @@ tbody tr:hover {
   overflow: auto;
 }
 
-.badge {
+.score-value {
   display: inline-block;
-  min-width: 34px;
+  min-width: 56px;
   text-align: center;
   border-radius: 999px;
-  padding: 4px 10px;
+  padding: 6px 12px;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 13px;
+  background: #f3f4f6;
+  color: #111827;
 }
 
-.badge-yes {
+.score-good {
   background: #dcfce7;
   color: #166534;
 }
 
-.badge-no {
+.score-bad {
   background: #fee2e2;
   color: #991b1b;
 }
