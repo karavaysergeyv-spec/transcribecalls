@@ -28,9 +28,6 @@ const limitSelectEl = document.getElementById('limitSelect')
 const loadBtnEl = document.getElementById('loadBtn')
 const resetBtnEl = document.getElementById('resetBtn')
 const callsTableEl = document.getElementById('callsTable')
-const tableWrapEl = document.getElementById('tableWrap')
-const topScrollWrapEl = document.getElementById('topScrollWrap')
-const topScrollInnerEl = document.getElementById('topScrollInner')
 
 const modalOverlayEl = document.getElementById('modalOverlay')
 const modalTitleEl = document.getElementById('modalTitle')
@@ -41,7 +38,6 @@ const copyModalBtnEl = document.getElementById('copyModalBtn')
 
 let currentModalText = ''
 let operatorsLoaded = false
-let scrollSyncLocked = false
 
 loadBtnEl.addEventListener('click', loadCalls)
 resetBtnEl.addEventListener('click', resetFilters)
@@ -62,24 +58,6 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && document.activeElement?.tagName !== 'BUTTON') {
     loadCalls()
   }
-})
-
-window.addEventListener('resize', () => {
-  requestAnimationFrame(syncTopScrollbar)
-})
-
-topScrollWrapEl.addEventListener('scroll', () => {
-  if (scrollSyncLocked) return
-  scrollSyncLocked = true
-  tableWrapEl.scrollLeft = topScrollWrapEl.scrollLeft
-  scrollSyncLocked = false
-})
-
-tableWrapEl.addEventListener('scroll', () => {
-  if (scrollSyncLocked) return
-  scrollSyncLocked = true
-  topScrollWrapEl.scrollLeft = tableWrapEl.scrollLeft
-  scrollSyncLocked = false
 })
 
 function setStatus(message, isError = false) {
@@ -133,12 +111,6 @@ function normalizeCorrectValue(value) {
   return 0
 }
 
-function renderCorrectBadge(value) {
-  return normalizeCorrectValue(value) === 1
-    ? '<span class="badge badge-yes">1</span>'
-    : '<span class="badge badge-no">0</span>'
-}
-
 function tryFormatJson(text) {
   if (!text) return ''
   if (typeof text !== 'string') {
@@ -175,41 +147,74 @@ function normalizePhoneForPrefix(phone) {
   return digits
 }
 
-function extractTotalScore(processed) {
+function parseProcessed(processed) {
   if (processed === null || processed === undefined || processed === '') {
     return null
   }
 
-  let obj = processed
-
   if (typeof processed === 'string') {
     try {
-      obj = JSON.parse(processed)
+      return JSON.parse(processed)
     } catch {
       return null
     }
   }
 
-  const score = obj?.total_score
-  const n = Number(score)
+  if (typeof processed === 'object') {
+    return processed
+  }
 
-  return Number.isFinite(n) ? n : null
+  return null
 }
 
-function syncTopScrollbar() {
-  const tableWidth = callsTableEl.scrollWidth
-  const containerWidth = tableWrapEl.clientWidth
+function extractTotalScore(processed) {
+  const obj = parseProcessed(processed)
+  if (!obj) return null
 
-  topScrollInnerEl.style.width = `${tableWidth}px`
+  const score = Number(obj.total_score)
+  return Number.isFinite(score) ? score : null
+}
 
-  if (tableWidth > containerWidth + 2) {
-    topScrollWrapEl.classList.add('visible')
-    topScrollWrapEl.scrollLeft = tableWrapEl.scrollLeft
-  } else {
-    topScrollWrapEl.classList.remove('visible')
-    topScrollWrapEl.scrollLeft = 0
-    tableWrapEl.scrollLeft = 0
+function extractMaxScore(processed) {
+  const obj = parseProcessed(processed)
+  if (!obj) return null
+
+  const score = Number(obj.max_score)
+  return Number.isFinite(score) ? score : null
+}
+
+function getScoreRatio(totalScore, maxScore) {
+  if (!Number.isFinite(totalScore) || !Number.isFinite(maxScore) || maxScore <= 0) {
+    return null
   }
+
+  return totalScore / maxScore
+}
+
+function renderTotalScoreCell(processed) {
+  const totalScore = extractTotalScore(processed)
+  const maxScore = extractMaxScore(processed)
+  const ratio = getScoreRatio(totalScore, maxScore)
+
+  if (totalScore === null) {
+    return '<span class="score-value">—</span>'
+  }
+
+  const scoreClass = ratio !== null && ratio < 0.7
+    ? 'score-bad'
+    : 'score-good'
+
+  return `<span class="score-value ${scoreClass}">${escapeHtml(totalScore)}</span>`
+}
+
+function renderMaxScoreCell(processed) {
+  const maxScore = extractMaxScore(processed)
+
+  if (maxScore === null) {
+    return '<span class="score-value">—</span>'
+  }
+
+  return `<span class="score-value">${escapeHtml(maxScore)}</span>`
 }
 
 async function loadCreatedByOptions() {
@@ -307,8 +312,6 @@ function renderTable(rows) {
         <td colspan="13" class="empty">Немає даних</td>
       </tr>
     `
-    bindModalButtons()
-    requestAnimationFrame(syncTopScrollbar)
     return
   }
 
@@ -318,8 +321,8 @@ function renderTable(rows) {
       <td>${escapeHtml(row.created_by ?? '')}</td>
       <td>${escapeHtml(row.from_number ?? '')}</td>
       <td>${escapeHtml(row.to_number ?? '')}</td>
-      <td>${escapeHtml(row.operator_score ?? '')}</td>
-      <td>${renderCorrectBadge(row.is_correct)}</td>
+      <td>${renderTotalScoreCell(row.processed_transcription)}</td>
+      <td>${renderMaxScoreCell(row.processed_transcription)}</td>
       <td>${escapeHtml(row.case_category ?? '')}</td>
       <td>${escapeHtml(row.case_subcategory ?? '')}</td>
       <td>${escapeHtml(row.case_operation_code ?? '')}</td>
@@ -331,7 +334,6 @@ function renderTable(rows) {
   `).join('')
 
   bindModalButtons()
-  requestAnimationFrame(syncTopScrollbar)
 }
 
 function bindModalButtons() {
@@ -377,7 +379,9 @@ function rowMatchesSearch(row, search) {
     row.queue_display,
     row.raw_transcription,
     row.processed_transcription,
-    row.is_correct
+    row.is_correct,
+    extractTotalScore(row.processed_transcription),
+    extractMaxScore(row.processed_transcription)
   ]
     .map(v => (v ?? '').toString().toLowerCase())
     .join(' ')
@@ -505,7 +509,6 @@ async function loadCalls() {
     setStatus(`Завантажено записів: ${rows.length}`)
 
     setupResizableColumns()
-    requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
     renderTable([])
@@ -538,14 +541,12 @@ function setupResizableColumns() {
     const onMouseMove = (e) => {
       const newWidth = startWidth + (e.clientX - startX)
       th.style.width = `${Math.max(newWidth, 80)}px`
-      requestAnimationFrame(syncTopScrollbar)
     }
 
     const onMouseUp = () => {
       th.classList.remove('resizing')
       document.removeEventListener('mousemove', onMouseMove)
       document.removeEventListener('mouseup', onMouseUp)
-      requestAnimationFrame(syncTopScrollbar)
     }
 
     handle.addEventListener('mousedown', (e) => {
