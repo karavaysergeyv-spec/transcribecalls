@@ -1,9 +1,5 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-const SUPABASE_URL = 'https://ewhypwoqhsjplhcsiujb.supabase.co'
-const SUPABASE_ANON_KEY = 'sb_publishable_gImXiiwh6hq6LATuipSbUw_CmzawS_Q'
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+const API_BASE = 'https://108.143.242.121'
+const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIiLCJleHAiOjE3Nzg2NzM5NDB9.OaxjGNMyrQZGTCwFoaMzVFWSlVll4jR4xmVWJYzXX_A'
 
 const statusEl = document.getElementById('status')
 const callsBodyEl = document.getElementById('callsBody')
@@ -49,9 +45,7 @@ closeModalBtnEl.addEventListener('click', closeModal)
 copyModalBtnEl.addEventListener('click', copyModalText)
 
 modalOverlayEl.addEventListener('click', (e) => {
-  if (e.target === modalOverlayEl) {
-    closeModal()
-  }
+  if (e.target === modalOverlayEl) closeModal()
 })
 
 document.addEventListener('keydown', (e) => {
@@ -170,9 +164,7 @@ function normalizePhoneForPrefix(phone) {
 }
 
 function parseProcessed(processed) {
-  if (processed === null || processed === undefined || processed === '') {
-    return null
-  }
+  if (processed === null || processed === undefined || processed === '') return null
 
   if (typeof processed === 'string') {
     try {
@@ -182,9 +174,7 @@ function parseProcessed(processed) {
     }
   }
 
-  if (typeof processed === 'object') {
-    return processed
-  }
+  if (typeof processed === 'object') return processed
 
   return null
 }
@@ -222,10 +212,7 @@ function renderTotalScoreCell(processed) {
     return '<span class="score-value">—</span>'
   }
 
-  const scoreClass = ratio !== null && ratio < 0.7
-    ? 'score-bad'
-    : 'score-good'
-
+  const scoreClass = ratio !== null && ratio < 0.7 ? 'score-bad' : 'score-good'
   return `<span class="score-value ${scoreClass}">${escapeHtml(totalScore)}</span>`
 }
 
@@ -255,18 +242,114 @@ function syncTopScrollbar() {
   }
 }
 
+async function apiFetch(path, options = {}) {
+  const headers = {
+    'Authorization': `Bearer ${API_TOKEN}`,
+    ...options.headers
+  }
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers
+  })
+
+  const text = await response.text()
+  let payload = null
+
+  try {
+    payload = text ? JSON.parse(text) : null
+  } catch {
+    payload = text
+  }
+
+  if (!response.ok) {
+    const message =
+      payload && typeof payload === 'object' && payload.message
+        ? payload.message
+        : `HTTP ${response.status}`
+    throw new Error(message)
+  }
+
+  return payload
+}
+
+function buildCallsViewQuery() {
+  const params = new URLSearchParams()
+
+  params.set(
+    'select',
+    [
+      'created_on',
+      'created_by',
+      'from_number',
+      'to_number',
+      'operator_score',
+      'case_category',
+      'case_subcategory',
+      'case_operation_code',
+      'case_display',
+      'queue_display',
+      'is_correct',
+      'raw_transcription',
+      'processed_transcription'
+    ].join(',')
+  )
+
+  params.set('order', 'created_on.desc')
+  params.set('limit', String(Number(limitSelectEl.value) || 50))
+
+  const createdByFilter = createdBySelectEl.value.trim()
+  const caseCategoryFilter = caseCategoryInputEl.value.trim()
+  const caseSubcategoryFilter = caseSubcategoryInputEl.value.trim()
+  const caseOperationCodeFilter = caseOperationCodeInputEl.value.trim()
+  const caseDisplayFilter = caseDisplayInputEl.value.trim()
+  const queueDisplayFilter = queueDisplayInputEl.value.trim()
+  const dateFrom = dateFromEl.value
+  const dateTo = dateToEl.value
+  const correctFilter = correctFilterEl.value
+
+  if (dateFrom) {
+    params.append('created_on', `gte.${dateFrom}T00:00:00`)
+  }
+
+  if (dateTo) {
+    params.append('created_on', `lte.${dateTo}T23:59:59`)
+  }
+
+  if (correctFilter === '1' || correctFilter === '0') {
+    params.set('is_correct', `eq.${Number(correctFilter)}`)
+  }
+
+  if (createdByFilter) {
+    params.set('created_by', `eq.${createdByFilter}`)
+  }
+
+  if (caseCategoryFilter) {
+    params.set('case_category', `ilike.*${caseCategoryFilter}*`)
+  }
+
+  if (caseSubcategoryFilter) {
+    params.set('case_subcategory', `ilike.*${caseSubcategoryFilter}*`)
+  }
+
+  if (caseOperationCodeFilter) {
+    params.set('case_operation_code', `ilike.*${caseOperationCodeFilter}*`)
+  }
+
+  if (caseDisplayFilter) {
+    params.set('case_display', `ilike.*${caseDisplayFilter}*`)
+  }
+
+  if (queueDisplayFilter) {
+    params.set('queue_display', `ilike.*${queueDisplayFilter}*`)
+  }
+
+  return `/calls_view?${params.toString()}`
+}
+
 async function loadCreatedByOptions() {
   try {
-    const { data, error } = await supabase
-      .from('calls_view')
-      .select('created_by')
-      .not('created_by', 'is', null)
-      .order('created_by', { ascending: true })
-      .limit(1000)
-
-    if (error) {
-      throw error
-    }
+    const data = await apiFetch('/calls_view?select=created_by&order=created_by.asc&limit=1000')
 
     const uniqueOperators = [...new Set(
       (data || [])
@@ -438,83 +521,12 @@ async function loadCalls() {
 
     setStatus('Завантаження даних...')
 
-    const limit = Number(limitSelectEl.value) || 50
     const search = searchInputEl.value.trim().toLowerCase()
-    const createdByFilter = createdBySelectEl.value.trim()
     const fromCodeFilter = fromCodeInputEl.value.trim()
-    const caseCategoryFilter = caseCategoryInputEl.value.trim()
-    const caseSubcategoryFilter = caseSubcategoryInputEl.value.trim()
-    const caseOperationCodeFilter = caseOperationCodeInputEl.value.trim()
-    const caseDisplayFilter = caseDisplayInputEl.value.trim()
-    const queueDisplayFilter = queueDisplayInputEl.value.trim()
     const totalScoreMinRaw = totalScoreMinEl.value.trim()
     const totalScoreMaxRaw = totalScoreMaxEl.value.trim()
-    const dateFrom = dateFromEl.value
-    const dateTo = dateToEl.value
-    const correctFilter = correctFilterEl.value
 
-    let query = supabase
-      .from('calls_view')
-      .select(`
-        created_on,
-        created_by,
-        from_number,
-        to_number,
-        operator_score,
-        case_category,
-        case_subcategory,
-        case_operation_code,
-        case_display,
-        queue_display,
-        is_correct,
-        raw_transcription,
-        processed_transcription
-      `)
-      .order('created_on', { ascending: false })
-      .limit(limit)
-
-    if (dateFrom) {
-      query = query.gte('created_on', `${dateFrom}T00:00:00`)
-    }
-
-    if (dateTo) {
-      query = query.lte('created_on', `${dateTo}T23:59:59`)
-    }
-
-    if (correctFilter === '1' || correctFilter === '0') {
-      query = query.eq('is_correct', Number(correctFilter))
-    }
-
-    if (createdByFilter) {
-      query = query.eq('created_by', createdByFilter)
-    }
-
-    if (caseCategoryFilter) {
-      query = query.ilike('case_category', `%${caseCategoryFilter}%`)
-    }
-
-    if (caseSubcategoryFilter) {
-      query = query.ilike('case_subcategory', `%${caseSubcategoryFilter}%`)
-    }
-
-    if (caseOperationCodeFilter) {
-      query = query.ilike('case_operation_code', `%${caseOperationCodeFilter}%`)
-    }
-
-    if (caseDisplayFilter) {
-      query = query.ilike('case_display', `%${caseDisplayFilter}%`)
-    }
-
-    if (queueDisplayFilter) {
-      query = query.ilike('queue_display', `%${queueDisplayFilter}%`)
-    }
-
-    const { data, error } = await query
-
-    if (error) {
-      throw error
-    }
-
+    const data = await apiFetch(buildCallsViewQuery())
     let rows = data || []
 
     if (fromCodeFilter) {
