@@ -5,8 +5,6 @@ const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIi
 const statusEl = document.getElementById('status')
 const callsBodyEl = document.getElementById('callsBody')
 const totalCountEl = document.getElementById('totalCount')
-const avgScoreEl = document.getElementById('avgScore')
-const correctCountEl = document.getElementById('correctCount')
 const correctPercentEl = document.getElementById('correctPercent')
 
 const searchInputEl = document.getElementById('searchInput')
