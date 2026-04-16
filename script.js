@@ -1,7 +1,6 @@
 const API_BASE = 'https://108.143.242.121'
 const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIiLCJleHAiOjE3Nzg2NzM5NDB9.OaxjGNMyrQZGTCwFoaMzVFWSlVll4jR4xmVWJYzXX_A'
 
-
 const statusEl = document.getElementById('status')
 const callsBodyEl = document.getElementById('callsBody')
 const totalCountEl = document.getElementById('totalCount')
@@ -78,7 +77,7 @@ tableWrapEl.addEventListener('scroll', () => {
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message
-  statusEl.style.color = isError ? '#b91c1c' : '#374151'
+  statusEl.style.color = isError ? '#b91c1c' : '#334155'
 }
 
 function resetFilters() {
@@ -114,12 +113,6 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;')
-}
-
-function toNumberOrNull(value) {
-  if (value === null || value === undefined || value === '') return null
-  const n = Number(value)
-  return Number.isFinite(n) ? n : null
 }
 
 function normalizeCorrectValue(value) {
