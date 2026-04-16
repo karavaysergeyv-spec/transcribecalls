@@ -247,3 +247,6 @@ tbody tr:hover {
   padding: 16px;
   overflow: auto;
 }
+.top-scroll-wrap.visible {
+  display: block !important;
+}
