@@ -7,199 +7,74 @@
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
-  <header class="topbar">
-    <div>
-      <h1>Панель дзвінків</h1>
-      <p class="subtitle">Транскрібація Creatio</p>
-    </div>
-  </header>
-
-  <main class="container">
-    <section class="panel filters">
-      <div class="field field-search">
-        <label for="searchInput">Загальний пошук</label>
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Номер, оператор, категорія, черга, транскрипція"
-        />
-      </div>
-
-      <div class="field">
-        <label for="createdBySelect">Оператор</label>
-        <select id="createdBySelect">
-          <option value="">Усі оператори</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="fromCodeInput">Код оператора</label>
-        <input
-          id="fromCodeInput"
-          type="text"
-          placeholder="Наприклад: 099, 066, 097"
-          maxlength="3"
-        />
-      </div>
-
-      <div class="field">
-        <label for="caseCategoryInput">Категорія</label>
-        <input
-          id="caseCategoryInput"
-          type="text"
-          placeholder="Наприклад: Перевірка платежу"
-        />
-      </div>
-
-      <div class="field">
-        <label for="caseSubcategoryInput">Під категорія</label>
-        <input
-          id="caseSubcategoryInput"
-          type="text"
-          placeholder="Наприклад: Успішний платіж"
-        />
-      </div>
-
-      <div class="field">
-        <label for="caseOperationCodeInput">Операція</label>
-        <input
-          id="caseOperationCodeInput"
-          type="text"
-          placeholder="Наприклад: 1018018758"
-        />
-      </div>
-
-      <div class="field">
-        <label for="caseDisplayInput">Оператор</label>
-        <input
-          id="caseDisplayInput"
-          type="text"
-          placeholder="Наприклад: C2C"
-        />
-      </div>
-
-      <div class="field">
-        <label for="queueDisplayInput">Черга</label>
-        <input
-          id="queueDisplayInput"
-          type="text"
-          placeholder="Наприклад: Оператори call center"
-        />
-      </div>
-
-      <div class="field">
-        <label for="totalScoreMin">Оцінка ≥</label>
-        <input id="totalScoreMin" type="number" step="any" placeholder="Наприклад: 5" />
-      </div>
-
-      <div class="field">
-        <label for="totalScoreMax">Оцінка ≤</label>
-        <input id="totalScoreMax" type="number" step="any" placeholder="Наприклад: 10" />
-      </div>
-
-      <div class="field">
-        <label for="dateFrom">Дата від</label>
-        <input id="dateFrom" type="date" />
-      </div>
-
-      <div class="field">
-        <label for="dateTo">Дата до</label>
-        <input id="dateTo" type="date" />
-      </div>
-
-      <div class="field">
-        <label for="correctFilter">Коректний</label>
-        <select id="correctFilter">
-          <option value="">Усі</option>
-          <option value="1">Так</option>
-          <option value="0">Ні</option>
-        </select>
-      </div>
-
-      <div class="field">
-        <label for="limitSelect">Кількість рядків</label>
-        <select id="limitSelect">
-          <option value="20">20</option>
-          <option value="50" selected>50</option>
-          <option value="100">100</option>
-          <option value="200">200</option>
-          <option value="500">500</option>
-        </select>
-      </div>
-
-      <div class="actions">
-        <button id="loadBtn">Завантажити</button>
-        <button id="resetBtn" class="secondary">Скинути</button>
-      </div>
-    </section>
-
-    <section class="panel summary">
-  <div class="summary-item">
-    <span class="summary-label">Усього рядків</span>
-    <span class="summary-value" id="totalCount">0</span>
-  </div>
-
-  <div class="summary-item">
-    <span class="summary-label">Коректних</span>
-    <span class="summary-value" id="correctPercent">0%</span>
-  </div>
-</section>
-
-    <section class="panel">
-      <div id="status" class="status">Готово до завантаження</div>
-
-      <div id="topScrollWrap" class="top-scroll-wrap" aria-label="Верхній горизонтальний скрол">
-        <div id="topScrollInner" class="top-scroll-inner"></div>
-      </div>
-
-      <div id="tableWrap" class="table-wrap">
-        <table id="callsTable">
-          <thead>
-            <tr>
-              <th>Дата</th>
-              <th>Оператор</th>
-              <th>Звідки</th>
-              <th>Куди</th>
-              <th>Total score</th>
-              <th>Max score</th>
-              <th>Категорія</th>
-              <th>Підкатегорія</th>
-              <th>Код операції</th>
-              <th>Кейс</th>
-              <th>Черга</th>
-              <th>Коректність</th>
-              <th>Raw транскрібація</th>
-              <th>Резульат</th>
-            </tr>
-          </thead>
-          <tbody id="callsBody">
-            <tr>
-              <td colspan="14" class="empty">Немає даних</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
-
-  <div id="modalOverlay" class="modal-overlay hidden">
-    <div class="modal-window">
-      <div class="modal-header">
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar-content">
         <div>
-          <h2 id="modalTitle">Деталі</h2>
-          <div id="modalMeta" class="modal-meta"></div>
-        </div>
-        <div class="modal-actions">
-          <button id="copyModalBtn" class="secondary">Копіювати</button>
-          <button id="closeModalBtn" class="modal-close">Закрити</button>
+          <div class="eyebrow">Rockpay Workspace</div>
+          <h1>Панель дзвінків</h1>
+          <p class="subtitle">Транскрібація Creatio · аналітика та контроль якості</p>
         </div>
       </div>
-      <div class="modal-body">
-        <pre id="modalContent" class="modal-content"></pre>
-      </div>
-    </div>
-  </div>
+    </header>
 
-  <script type="module" src="./script.js"></script>
-</body>
+    <main class="container">
+      <section class="panel filters">
+        <div class="field field-search">
+          <label for="searchInput">Загальний пошук</label>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="Номер, оператор, категорія, черга, транскрипція"
+          />
+        </div>
+
+        <div class="field">
+          <label for="createdBySelect">Оператор</label>
+          <select id="createdBySelect">
+            <option value="">Усі оператори</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="fromCodeInput">Код оператора</label>
+          <input
+            id="fromCodeInput"
+            type="text"
+            placeholder="Наприклад: 099, 066, 097"
+            maxlength="3"
+          />
+        </div>
+
+        <div class="field">
+          <label for="caseCategoryInput">Категорія</label>
+          <input
+            id="caseCategoryInput"
+            type="text"
+            placeholder="Наприклад: Перевірка платежу"
+          />
+        </div>
+
+        <div class="field">
+          <label for="caseSubcategoryInput">Під категорія</label>
+          <input
+            id="caseSubcategoryInput"
+            type="text"
+            placeholder="Наприклад: Успішний платіж"
+          />
+        </div>
+
+        <div class="field">
+          <label for="caseOperationCodeInput">Операція</label>
+          <input
+            id="caseOperationCodeInput"
+            type="text"
+            placeholder="Наприклад: 1018018758"
+          />
+        </div>
+
+        <div class="field">
+          <label for="caseDisplayInput">Оператор</label>
+          <input
+            id="caseDisplayInput"
 </html>
