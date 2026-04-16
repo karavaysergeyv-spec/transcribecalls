@@ -68,6 +68,15 @@ body {
   align-items: center;
   gap: 4px;
 }
+.summary-value.score-good,
+.summary-value.score-bad {
+  display: inline-block;
+  padding: 0;
+  min-width: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
 
 .brand-box {
   width: 38px;
