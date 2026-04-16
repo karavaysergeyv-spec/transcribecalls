@@ -125,6 +125,11 @@ button:hover {
   font-weight: 700;
 }
 
+.summary-percent {
+  display: block;
+  margin-top: 8px;
+}
+
 .status {
   margin-bottom: 12px;
   font-size: 14px;
