@@ -120,11 +120,10 @@
         <label for="limitSelect">Кількість рядків</label>
         <select id="limitSelect">
           <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100" selected>100</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
           <option value="200">200</option>
           <option value="500">500</option>
-          <option value="1000">1000</option>
         </select>
       </div>
 
@@ -140,12 +139,13 @@
         <span class="summary-value" id="totalCount">0</span>
       </div>
       <div class="summary-item">
-        <span class="summary-label">Середня оцінка</span>
+        <span class="summary-label">Середня оцінка клієнтом</span>
         <span class="summary-value" id="avgScore">—</span>
       </div>
       <div class="summary-item">
         <span class="summary-label">Коректних</span>
         <span class="summary-value" id="correctCount">0</span>
+        <span class="summary-percent" id="correctPercent">0%</span>
       </div>
     </section>
 
@@ -171,13 +171,14 @@
               <th>Код операції</th>
               <th>Кейс</th>
               <th>Черга</th>
+              <th>Коректність</th>
               <th>Raw транскрібація</th>
               <th>Резульат</th>
             </tr>
           </thead>
           <tbody id="callsBody">
             <tr>
-              <td colspan="13" class="empty">Немає даних</td>
+              <td colspan="14" class="empty">Немає даних</td>
             </tr>
           </tbody>
         </table>
