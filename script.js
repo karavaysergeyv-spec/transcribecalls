@@ -77,7 +77,7 @@ tableWrapEl.addEventListener('scroll', () => {
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message
-  statusEl.style.color = isError ? '#b91c1c' : '#334155'
+  statusEl.style.color = isError ? '#ff9b9b' : '#b9b3a8'
 }
 
 function resetFilters() {
