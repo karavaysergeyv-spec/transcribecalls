@@ -490,24 +490,7 @@ function bindModalButtons() {
 function renderSummary(rows) {
   totalCountEl.textContent = rows.length
 
-  const clientScores = rows
-    .map(r => normalizeCorrectValue(r.is_correct))
-    .filter(v => v === 0 || v === 1)
-
-  const avgScore = clientScores.length
-    ? ((clientScores.reduce((a, b) => a + b, 0) / clientScores.length) * 100).toFixed(1)
-    : null
-
-  if (avgScore !== null) {
-    const avgNumeric = Number(avgScore)
-    const avgClass = avgNumeric >= 70 ? 'score-good' : 'score-bad'
-    avgScoreEl.innerHTML = `<span class="score-value ${avgClass}">${avgScore}%</span>`
-  } else {
-    avgScoreEl.textContent = '—'
-  }
-
   const correctCount = rows.filter(r => normalizeCorrectValue(r.is_correct) === 1).length
-  correctCountEl.textContent = correctCount
 
   const percent = rows.length
     ? ((correctCount / rows.length) * 100).toFixed(1)
