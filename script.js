@@ -1,11 +1,13 @@
 const API_BASE = 'https://108.143.242.121'
 const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIiLCJleHAiOjE3Nzg2NzM5NDB9.OaxjGNMyrQZGTCwFoaMzVFWSlVll4jR4xmVWJYzXX_A'
 
+
 const statusEl = document.getElementById('status')
 const callsBodyEl = document.getElementById('callsBody')
 const totalCountEl = document.getElementById('totalCount')
 const avgScoreEl = document.getElementById('avgScore')
 const correctCountEl = document.getElementById('correctCount')
+const correctPercentEl = document.getElementById('correctPercent')
 
 const searchInputEl = document.getElementById('searchInput')
 const createdBySelectEl = document.getElementById('createdBySelect')
@@ -125,6 +127,18 @@ function toNumberOrNull(value) {
 function normalizeCorrectValue(value) {
   if (value === true || value === 'true' || value === 1 || value === '1') return 1
   return 0
+}
+
+function correctnessBadgeMeta(value) {
+  const normalized = normalizeCorrectValue(value)
+  return normalized === 1
+    ? { label: 'Так', className: 'score-good' }
+    : { label: 'Ні', className: 'score-bad' }
+}
+
+function renderCorrectnessCell(value) {
+  const meta = correctnessBadgeMeta(value)
+  return `<span class="score-value ${meta.className}">${meta.label}</span>`
 }
 
 function tryFormatJson(text) {
@@ -430,7 +444,7 @@ function renderTable(rows) {
   if (!rows || rows.length === 0) {
     callsBodyEl.innerHTML = `
       <tr>
-        <td colspan="13" class="empty">Немає даних</td>
+        <td colspan="14" class="empty">Немає даних</td>
       </tr>
     `
     bindModalButtons()
@@ -451,6 +465,7 @@ function renderTable(rows) {
       <td>${escapeHtml(row.case_operation_code ?? '')}</td>
       <td>${escapeHtml(row.case_display ?? '')}</td>
       <td>${escapeHtml(row.queue_display ?? '')}</td>
+      <td>${renderCorrectnessCell(row.is_correct)}</td>
       <td>${renderTextCell(row.raw_transcription, 'raw', row)}</td>
       <td>${renderTextCell(row.processed_transcription, 'processed', row)}</td>
     </tr>
@@ -477,18 +492,31 @@ function bindModalButtons() {
 function renderSummary(rows) {
   totalCountEl.textContent = rows.length
 
-  const scores = rows
-    .map(r => toNumberOrNull(r.operator_score))
-    .filter(v => v !== null)
+  const clientScores = rows
+    .map(r => normalizeCorrectValue(r.is_correct))
+    .filter(v => v === 0 || v === 1)
 
-  const avgScore = scores.length
-    ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(2)
-    : '—'
+  const avgScore = clientScores.length
+    ? ((clientScores.reduce((a, b) => a + b, 0) / clientScores.length) * 100).toFixed(1)
+    : null
 
-  avgScoreEl.textContent = avgScore
+  if (avgScore !== null) {
+    const avgNumeric = Number(avgScore)
+    const avgClass = avgNumeric >= 70 ? 'score-good' : 'score-bad'
+    avgScoreEl.innerHTML = `<span class="score-value ${avgClass}">${avgScore}%</span>`
+  } else {
+    avgScoreEl.textContent = '—'
+  }
 
   const correctCount = rows.filter(r => normalizeCorrectValue(r.is_correct) === 1).length
   correctCountEl.textContent = correctCount
+
+  const percent = rows.length
+    ? ((correctCount / rows.length) * 100).toFixed(1)
+    : '0.0'
+
+  const percentClass = Number(percent) >= 70 ? 'score-good' : 'score-bad'
+  correctPercentEl.innerHTML = `<span class="score-value ${percentClass}">${percent}%</span>`
 }
 
 function rowMatchesSearch(row, search) {
