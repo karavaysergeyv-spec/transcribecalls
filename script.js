@@ -489,8 +489,10 @@ function renderSummary(rows) {
     ? ((correctCount / rows.length) * 100).toFixed(1)
     : '0.0'
 
-  const percentClass = Number(percent) >= 70 ? 'score-good' : 'score-bad'
-  correctPercentEl.innerHTML = `<span class="score-value ${percentClass}">${percent}%</span>`
+  correctPercentEl.textContent = `${percent}%`
+
+  correctPercentEl.classList.remove('score-good', 'score-bad')
+  correctPercentEl.classList.add(Number(percent) >= 70 ? 'score-good' : 'score-bad')
 }
 
 function rowMatchesSearch(row, search) {
