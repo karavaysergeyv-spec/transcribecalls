@@ -122,10 +122,10 @@ body {
 }
 
 .container {
-  max-width: none;
+ max-width: none;
   width: 100%;
   margin: 0;
-  padding: 28px 12px 34px;
+  padding: 20px 6px 28px;
 }
 
 .hero-card {
