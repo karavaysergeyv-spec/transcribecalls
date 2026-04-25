@@ -651,3 +651,9 @@ th.resizing {
     flex: 1;
   }
 }
+
+table th,
+table td {
+  padding: 6px 6px !important;
+  font-size: 13px;
+}
