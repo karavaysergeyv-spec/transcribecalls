@@ -657,3 +657,7 @@ table td {
   padding: 7px 7px !important;
   font-size: 13px;
 }
+table th {
+  text-align: center !important;
+  vertical-align: middle;
+}
