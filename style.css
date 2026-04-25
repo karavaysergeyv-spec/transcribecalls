@@ -689,7 +689,11 @@ table th {
 #callsTable th:nth-child(5),
 #callsTable td:nth-child(5) {
   text-align: center;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;  
 }
+
 
 /* Max score */
 #callsTable th:nth-child(6),
