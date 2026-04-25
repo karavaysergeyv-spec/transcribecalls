@@ -68,6 +68,7 @@ body {
   align-items: center;
   gap: 4px;
 }
+
 .summary-value.score-good,
 .summary-value.score-bad {
   display: inline-block;
@@ -122,7 +123,7 @@ body {
 }
 
 .container {
- max-width: none;
+  max-width: none;
   width: 100%;
   margin: 0;
   padding: 20px 2px 28px;
@@ -374,7 +375,9 @@ button.secondary {
 }
 
 .table-wrap {
+  max-height: 72vh;
   overflow: auto;
+  position: relative;
   border-radius: 20px;
   border: 1px solid var(--line);
   background: rgba(16, 18, 24, 0.34);
@@ -394,21 +397,25 @@ thead {
 
 th,
 td {
-  padding: 14px 14px;
+  padding: 7px 7px !important;
   border-bottom: 1px solid rgba(233, 227, 215, 0.08);
   text-align: left;
-  vertical-align: top;
-  font-size: 14px;
+  vertical-align: middle;
+  font-size: 13px;
 }
 
 th {
   position: sticky;
   top: 0;
-  z-index: 2;
+  z-index: 30;
   background: #1a1d24;
   color: var(--beige);
   font-weight: 700;
   white-space: nowrap;
+  text-align: center !important;
+  box-shadow:
+    0 1px 0 rgba(233, 227, 215, 0.14),
+    0 8px 18px rgba(0, 0, 0, 0.22);
 }
 
 tbody tr {
@@ -595,6 +602,78 @@ th.resizing {
   border-radius: 999px;
 }
 
+/* Выравнивание числовых/служебных колонок */
+#callsTable th:nth-child(1),
+#callsTable td:nth-child(1),
+#callsTable th:nth-child(2),
+#callsTable td:nth-child(2),
+#callsTable th:nth-child(3),
+#callsTable td:nth-child(3),
+#callsTable th:nth-child(4),
+#callsTable td:nth-child(4),
+#callsTable th:nth-child(5),
+#callsTable td:nth-child(5),
+#callsTable th:nth-child(6),
+#callsTable td:nth-child(6),
+#callsTable th:nth-child(7),
+#callsTable td:nth-child(7),
+#callsTable th:nth-child(8),
+#callsTable td:nth-child(8),
+#callsTable th:nth-child(9),
+#callsTable td:nth-child(9),
+#callsTable th:nth-child(10),
+#callsTable td:nth-child(10),
+#callsTable th:nth-child(11),
+#callsTable td:nth-child(11),
+#callsTable th:nth-child(12),
+#callsTable td:nth-child(12) {
+  text-align: center;
+}
+
+/* === COLUMN CONTROL === */
+.column-panel {
+  padding: 14px 18px;
+}
+
+.column-panel-title {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.column-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.column-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--beige);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.column-toggle input {
+  accent-color: var(--brand);
+}
+
+.column-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 @media (max-width: 1400px) {
   .filters {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -650,100 +729,4 @@ th.resizing {
   .modal-actions button {
     flex: 1;
   }
-}
-
-table th,
-table td {
-  padding: 7px 7px !important;
-  font-size: 13px;
-}
-table th {
-  text-align: center !important;
-  vertical-align: middle;
-}
-/* По умолчанию — текст слева */
-#callsTable th,
-#callsTable td {
-  text-align: left;
-  vertical-align: middle;
-}
-
-/* ЧИСЛОВЫЕ КОЛОНКИ — по центру */
-#callsTable th:nth-child(1),
-#callsTable td:nth-child(1) {
-  text-align: center;
-}
-#callsTable th:nth-child(2),
-#callsTable td:nth-child(2) {
-  text-align: center;
-}
-#callsTable th:nth-child(3),
-#callsTable td:nth-child(3) {
-  text-align: center;
-}
-#callsTable th:nth-child(4),
-#callsTable td:nth-child(4) {
-  text-align: center;
-}
-/* Total score */
-#callsTable th:nth-child(5),
-#callsTable td:nth-child(5) {
-  text-align: center;
-}
-
-/* Max score */
-#callsTable th:nth-child(6),
-#callsTable td:nth-child(6) {
-  text-align: center;
-}
-/* Max score */
-#callsTable th:nth-child(7),
-#callsTable td:nth-child(7) {
-  text-align: center;
-}
-/* Max score */
-#callsTable th:nth-child(8),
-#callsTable td:nth-child(8) {
-  text-align: center;
-}
-/* Код операції */
-#callsTable th:nth-child(9),
-#callsTable td:nth-child(9) {
-  text-align: center;
-}
-/* Код операції */
-#callsTable th:nth-child(10),
-#callsTable td:nth-child(10) {
-  text-align: center;
-}
-/* Код операції */
-#callsTable th:nth-child(11),
-#callsTable td:nth-child(11) {
-  text-align: center;
-}
-/* Коректність */
-#callsTable th:nth-child(12),
-#callsTable td:nth-child(12) {
-  text-align: center;
-}
-.table-wrap {
-  max-height: 72vh;
-  overflow: auto;
-  position: relative;
-}
-
-#callsTable thead th {
-  position: sticky;
-  top: 0;
-  z-index: 30;
-  background: #1a1d24;
-  box-shadow:
-    0 1px 0 rgba(233, 227, 215, 0.14),
-    0 8px 18px rgba(0, 0, 0, 0.22);
-}
-#callsTable thead th {
-  position: sticky;
-  top: 0px;
-  z-index: 30;
-  background: #1a1d24;
 }
