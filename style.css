@@ -661,21 +661,35 @@ table th {
   text-align: center !important;
   vertical-align: middle;
 }
-/* Центрируем всё по умолчанию */
+/* По умолчанию — текст слева */
 #callsTable th,
 #callsTable td {
-  text-align: center;
+  text-align: left;
   vertical-align: middle;
 }
 
-/* Первая колонка (Дата) — влево */
-#callsTable th:first-child,
-#callsTable td:first-child {
-  text-align: left;
+/* ЧИСЛОВЫЕ КОЛОНКИ — по центру */
+
+/* Total score */
+#callsTable th:nth-child(5),
+#callsTable td:nth-child(5) {
+  text-align: center;
 }
 
-/* Последняя колонка (Результат) — влево */
-#callsTable th:last-child,
-#callsTable td:last-child {
-  text-align: left;
+/* Max score */
+#callsTable th:nth-child(6),
+#callsTable td:nth-child(6) {
+  text-align: center;
+}
+
+/* Код операції */
+#callsTable th:nth-child(9),
+#callsTable td:nth-child(9) {
+  text-align: center;
+}
+
+/* Коректність */
+#callsTable th:nth-child(12),
+#callsTable td:nth-child(12) {
+  text-align: center;
 }
