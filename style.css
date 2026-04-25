@@ -743,7 +743,7 @@ table th {
 }
 #callsTable thead th {
   position: sticky;
-  top: 76px;
+  top: 0px;
   z-index: 30;
   background: #1a1d24;
 }
