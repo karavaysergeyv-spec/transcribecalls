@@ -672,6 +672,9 @@ table th {
 #callsTable th:nth-child(1),
 #callsTable td:nth-child(1) {
   text-align: center;
+      width: 135px;
+  min-width: 135px;
+  max-width: 135px;  
 }
 #callsTable th:nth-child(2),
 #callsTable td:nth-child(2) {
