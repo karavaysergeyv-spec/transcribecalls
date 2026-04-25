@@ -747,3 +747,45 @@ table th {
   z-index: 30;
   background: #1a1d24;
 }
+/* === COLUMN TOGGLES === */
+
+.column-panel {
+  padding: 14px 18px;
+}
+
+.column-panel-title {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.column-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.column-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--beige);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.column-toggle input {
+  accent-color: var(--brand);
+}
+
+.column-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+}
