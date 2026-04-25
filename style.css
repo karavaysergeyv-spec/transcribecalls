@@ -726,17 +726,24 @@ table th {
 #callsTable td:nth-child(12) {
   text-align: center;
 }
-/* Липкая шапка таблицы */
+.table-wrap {
+  max-height: 72vh;
+  overflow: auto;
+  position: relative;
+}
+
 #callsTable thead th {
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 30;
   background: #1a1d24;
-  box-shadow: 0 1px 0 rgba(233, 227, 215, 0.14),
-              0 8px 18px rgba(0, 0, 0, 0.22);
+  box-shadow:
+    0 1px 0 rgba(233, 227, 215, 0.14),
+    0 8px 18px rgba(0, 0, 0, 0.22);
 }
-
-/* Чтобы шапка не “просвечивала” при скролле */
-.table-wrap {
-  position: relative;
+#callsTable thead th {
+  position: sticky;
+  top: 76px;
+  z-index: 30;
+  background: #1a1d24;
 }
