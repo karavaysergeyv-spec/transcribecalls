@@ -296,6 +296,7 @@ button.secondary {
   padding: 24px;
   border-radius: 24px;
   border: 1px solid var(--line);
+  text-align: center;
   background:
     linear-gradient(180deg, rgba(49, 54, 65, 0.96), rgba(37, 40, 47, 0.98));
   box-shadow: var(--shadow);
