@@ -670,6 +670,18 @@ table th {
 
 /* ЧИСЛОВЫЕ КОЛОНКИ — по центру */
 
+#callsTable th:nth-child(2),
+#callsTable td:nth-child(2) {
+  text-align: center;
+}
+#callsTable th:nth-child(3),
+#callsTable td:nth-child(3) {
+  text-align: center;
+}
+#callsTable th:nth-child(4),
+#callsTable td:nth-child(4) {
+  text-align: center;
+}
 /* Total score */
 #callsTable th:nth-child(5),
 #callsTable td:nth-child(5) {
@@ -681,13 +693,26 @@ table th {
 #callsTable td:nth-child(6) {
   text-align: center;
 }
-
+/* Max score */
+#callsTable th:nth-child(7),
+#callsTable td:nth-child(7) {
+  text-align: center;
+}
+/* Max score */
+#callsTable th:nth-child(8),
+#callsTable td:nth-child(8) {
+  text-align: center;
+}
 /* Код операції */
 #callsTable th:nth-child(9),
 #callsTable td:nth-child(9) {
   text-align: center;
 }
-
+/* Код операції */
+#callsTable th:nth-child(10),
+#callsTable td:nth-child(10) {
+  text-align: center;
+}
 /* Коректність */
 #callsTable th:nth-child(12),
 #callsTable td:nth-child(12) {
