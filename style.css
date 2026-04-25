@@ -381,7 +381,7 @@ button.secondary {
 
 table {
   width: 100%;
-  min-width: 2400px;
+  min-width: 1800px;
   border-collapse: separate;
   border-spacing: 0;
   table-layout: fixed;
