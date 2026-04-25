@@ -661,3 +661,21 @@ table th {
   text-align: center !important;
   vertical-align: middle;
 }
+/* Центрируем всё по умолчанию */
+#callsTable th,
+#callsTable td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Первая колонка (Дата) — влево */
+#callsTable th:first-child,
+#callsTable td:first-child {
+  text-align: left;
+}
+
+/* Последняя колонка (Результат) — влево */
+#callsTable th:last-child,
+#callsTable td:last-child {
+  text-align: left;
+}
