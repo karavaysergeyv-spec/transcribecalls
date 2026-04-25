@@ -728,6 +728,9 @@ table th {
 #callsTable th:nth-child(10),
 #callsTable td:nth-child(10) {
   text-align: center;
+      width: 110px;
+  min-width: 110px;
+  max-width: 110px; 
 }
 /* Код операції */
 #callsTable th:nth-child(11),
