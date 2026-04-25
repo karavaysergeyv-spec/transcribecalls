@@ -680,10 +680,16 @@ table th {
 #callsTable th:nth-child(3),
 #callsTable td:nth-child(3) {
   text-align: center;
+   width: 110px;
+  min-width: 110px;
+  max-width: 110px;  
 }
 #callsTable th:nth-child(4),
 #callsTable td:nth-child(4) {
   text-align: center;
+     width: 110px;
+  min-width: 110px;
+  max-width: 110px;  
 }
 /* Total score */
 #callsTable th:nth-child(5),
