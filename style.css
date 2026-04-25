@@ -55,7 +55,7 @@ body {
 }
 
 .topbar-inner {
-  max-width: 1680px;
+  max-width: none;
   margin: 0 auto;
   padding: 18px 24px;
   display: flex;
@@ -122,9 +122,10 @@ body {
 }
 
 .container {
-  max-width: 1680px;
-  margin: 0 auto;
-  padding: 28px 24px 34px;
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 28px 12px 34px;
 }
 
 .hero-card {
