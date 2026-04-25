@@ -34,29 +34,6 @@ const modalContentEl = document.getElementById('modalContent')
 const closeModalBtnEl = document.getElementById('closeModalBtn')
 const copyModalBtnEl = document.getElementById('copyModalBtn')
 
-const columnTogglesEl = document.getElementById('columnToggles')
-const showAllColumnsBtn = document.getElementById('showAllColumnsBtn')
-const hideTextColumnsBtn = document.getElementById('hideTextColumnsBtn')
-
-const COLUMN_KEY = 'calls_table_columns'
-
-const columnsConfig = [
-  'Дата',
-  'Оператор',
-  'Звідки',
-  'Куди',
-  'Total',
-  'Max',
-  'Категорія',
-  'Підкатегорія',
-  'Код',
-  'Кейс',
-  'Черга',
-  'Коректність',
-  'Raw',
-  'JSON'
-]
-
 let currentModalText = ''
 let operatorsLoaded = false
 let scrollSyncLocked = false
@@ -462,7 +439,6 @@ function renderTable(rows) {
       </tr>
     `
     bindModalButtons()
-    applyColumnVisibility()
     requestAnimationFrame(syncTopScrollbar)
     return
   }
@@ -487,7 +463,6 @@ function renderTable(rows) {
   `).join('')
 
   bindModalButtons()
-  applyColumnVisibility()
   requestAnimationFrame(syncTopScrollbar)
 }
 
@@ -591,7 +566,6 @@ async function loadCalls() {
     setStatus(`Завантажено записів: ${rows.length}`)
 
     setupResizableColumns()
-    applyColumnVisibility()
     requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
@@ -647,72 +621,4 @@ function setupResizableColumns() {
   })
 }
 
-function loadColumnState() {
-  try {
-    return JSON.parse(localStorage.getItem(COLUMN_KEY) || '{}')
-  } catch {
-    return {}
-  }
-}
-
-function saveColumnState(state) {
-  localStorage.setItem(COLUMN_KEY, JSON.stringify(state))
-}
-
-function applyColumnVisibility() {
-  const state = loadColumnState()
-
-  document.querySelectorAll('#callsTable tr').forEach(row => {
-    columnsConfig.forEach((_, i) => {
-      const cell = row.children[i]
-      if (!cell) return
-
-      const visible = state[i] !== false
-      cell.style.display = visible ? '' : 'none'
-    })
-  })
-
-  requestAnimationFrame(syncTopScrollbar)
-}
-
-function renderColumnToggles() {
-  const state = loadColumnState()
-
-  if (!columnTogglesEl) return
-
-  columnTogglesEl.innerHTML = columnsConfig.map((name, i) => `
-    <label class="column-toggle">
-      <input type="checkbox" data-col="${i}" ${state[i] !== false ? 'checked' : ''}>
-      ${name}
-    </label>
-  `).join('')
-
-  columnTogglesEl.querySelectorAll('input').forEach(input => {
-    input.addEventListener('change', () => {
-      const col = input.dataset.col
-      const state = loadColumnState()
-      state[col] = input.checked
-      saveColumnState(state)
-      applyColumnVisibility()
-    })
-  })
-}
-
-showAllColumnsBtn.addEventListener('click', () => {
-  localStorage.removeItem(COLUMN_KEY)
-  renderColumnToggles()
-  applyColumnVisibility()
-})
-
-hideTextColumnsBtn.addEventListener('click', () => {
-  const state = loadColumnState()
-  state[12] = false
-  state[13] = false
-  saveColumnState(state)
-  renderColumnToggles()
-  applyColumnVisibility()
-})
-
-renderColumnToggles()
-applyColumnVisibility()
 loadCalls()
