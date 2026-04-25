@@ -751,6 +751,9 @@ table th {
 #callsTable th:nth-child(11),
 #callsTable td:nth-child(11) {
   text-align: center;
+     width: 140px;
+  min-width: 140px;
+  max-width: 140px;
 }
 /* Коректність */
 #callsTable th:nth-child(12),
