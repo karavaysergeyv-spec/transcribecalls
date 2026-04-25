@@ -689,6 +689,7 @@ table th {
 #callsTable th:nth-child(5),
 #callsTable td:nth-child(5) {
   text-align: center;
+  width: 50px;
 }
 
 /* Max score */
