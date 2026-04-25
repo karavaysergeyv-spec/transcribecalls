@@ -669,7 +669,10 @@ table th {
 }
 
 /* ЧИСЛОВЫЕ КОЛОНКИ — по центру */
-
+#callsTable th:nth-child(1),
+#callsTable td:nth-child(1) {
+  text-align: center;
+}
 #callsTable th:nth-child(2),
 #callsTable td:nth-child(2) {
   text-align: center;
@@ -711,6 +714,11 @@ table th {
 /* Код операції */
 #callsTable th:nth-child(10),
 #callsTable td:nth-child(10) {
+  text-align: center;
+}
+/* Код операції */
+#callsTable th:nth-child(11),
+#callsTable td:nth-child(11) {
   text-align: center;
 }
 /* Коректність */
