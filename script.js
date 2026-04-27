@@ -34,28 +34,26 @@ const PANEL_CONFIG = {
     view: 'chats_view',
     title: 'Панель чатів',
     subtitle: 'Chat Quality Dashboard',
-    description: 'Чати Creatio · контроль якості · аналітика операторів',
-    searchPlaceholder: 'Оператор, клієнт, категорія, черга, текст чату',
-    firstTextTitle: 'Raw чат',
-    secondTextTitle: 'Результат',
+    description: 'Чати Creatio · контроль якості · аналітика чатів',
+    searchPlaceholder: 'Контакт, канал, категорія, сервіс, текст чату',
+    firstTextTitle: 'Оригінальний діалог',
+    secondTextTitle: 'Аналіз чату',
     textType: 'чат',
     showFromCode: false,
     endpointMode: 'generic',
     columns: [
-      { title: 'Дата', render: row => escapeHtml(formatDateTime(getValue(row, ['created_on', 'created_at', 'date', 'chat_created_on']))) },
-      { title: 'Оператор', render: row => escapeHtml(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name'])) },
-      { title: 'Клієнт', render: row => escapeHtml(getValue(row, ['client_name', 'customer_name', 'contact_name', 'from_name', 'from_number', 'client_phone'])) },
-      { title: 'Канал', render: row => escapeHtml(getValue(row, ['channel', 'source', 'messenger', 'chat_channel', 'to_number'])) },
+      { title: 'Дата', render: row => escapeHtml(formatDateTime(getValue(row, ['created_on']))) },
+      { title: 'Контакт', render: row => escapeHtml(getValue(row, ['contact'])) },
+      { title: 'Канал', render: row => escapeHtml(getValue(row, ['channel'])) },
       { title: 'Total score', render: row => renderTotalScoreCell(getProcessedValue(row)) },
       { title: 'Max score', render: row => renderMaxScoreCell(getProcessedValue(row)) },
-      { title: 'Категорія', render: row => escapeHtml(getValue(row, ['case_category', 'category'])) },
-      { title: 'Підкатегорія', render: row => escapeHtml(getValue(row, ['case_subcategory', 'subcategory', 'case_sub_category'])) },
-      { title: 'Код операції', render: row => escapeHtml(getValue(row, ['case_operation_code', 'operation_code'])) },
-      { title: 'Кейс', render: row => escapeHtml(getValue(row, ['case_display', 'case_name', 'case'])) },
-      { title: 'Черга', render: row => escapeHtml(getValue(row, ['queue_display', 'queue', 'queue_name'])) },
-      { title: 'Коректність', render: row => renderCorrectnessCell(getValue(row, ['is_correct', 'correct'])) },
-      { title: 'Raw чат', render: row => renderTextCell(getRawValue(row), 'raw', row) },
-      { title: 'Результат', render: row => renderTextCell(getProcessedValue(row), 'processed', row) }
+      { title: 'Категорія', render: row => escapeHtml(getValue(row, ['case_category'])) },
+      { title: 'Підкатегорія', render: row => escapeHtml(getValue(row, ['case_subcategory'])) },
+      { title: 'Код операції', render: row => escapeHtml(getValue(row, ['case_operation_code'])) },
+      { title: 'Сервіс', render: row => escapeHtml(getValue(row, ['case_service'])) },
+      { title: 'Коректність', render: row => renderCorrectnessCell(getValue(row, ['is_correct']), getProcessedValue(row)) },
+      { title: 'Original dialogue', render: row => renderTextCell(getRawValue(row), 'raw', row) },
+      { title: 'Analyzed chat', render: row => renderTextCell(getProcessedValue(row), 'processed', row) }
     ]
   }
 }
@@ -158,6 +156,12 @@ function applyPanelUi() {
   els.pageDescription.textContent = cfg.description
   els.brandSubtitle.textContent = cfg.subtitle
   els.searchInput.placeholder = cfg.searchPlaceholder
+  document.querySelector('label[for=createdBySelect]').textContent = activePanel === 'chats' ? 'Контакт' : 'Оператор'
+  document.querySelector('label[for=caseDisplayInput]').textContent = activePanel === 'chats' ? 'Сервіс' : 'Кейс'
+  document.querySelector('label[for=queueDisplayInput]').textContent = activePanel === 'chats' ? 'Канал' : 'Черга'
+  els.caseDisplayInput.placeholder = activePanel === 'chats' ? 'Сервіс' : 'C2C'
+  els.queueDisplayInput.placeholder = activePanel === 'chats' ? 'monobank-web' : 'Оператори call center'
+  els.createdBySelect.innerHTML = `<option value="">${activePanel === 'chats' ? 'Усі контакти' : 'Усі оператори'}</option>`
   els.fromCodeField.classList.toggle('hidden', !cfg.showFromCode)
   renderTableHead()
 }
@@ -199,6 +203,7 @@ function getValue(row, keys) {
 function getRawValue(row) {
   return getValue(row, [
     'raw_transcription',
+    'original_dialogue',
     'raw_chat',
     'raw_messages',
     'chat_text',
@@ -213,6 +218,7 @@ function getRawValue(row) {
 function getProcessedValue(row) {
   return getValue(row, [
     'processed_transcription',
+    'analyzed_chat',
     'processed_chat',
     'processed_messages',
     'analysis_result',
@@ -239,8 +245,14 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;')
 }
 
-function normalizeCorrectValue(value) {
+function normalizeCorrectValue(value, analyzedText = '') {
   if (value === true || value === 'true' || value === 1 || value === '1') return 1
+  if (value === false || value === 'false' || value === 0 || value === '0') return 0
+
+  const text = String(analyzedText || value || '').toLowerCase()
+  if (text.includes('статус: коректний') || text.includes('status: correct')) return 1
+  if (text.includes('статус: некоректний') || text.includes('status: incorrect')) return 0
+
   return 0
 }
 
@@ -250,8 +262,8 @@ function correctnessBadgeMeta(value) {
     : { label: 'Ні', className: 'score-bad' }
 }
 
-function renderCorrectnessCell(value) {
-  const meta = correctnessBadgeMeta(value)
+function renderCorrectnessCell(value, analyzedText = '') {
+  const meta = correctnessBadgeMeta(normalizeCorrectValue(value, analyzedText))
   return `<span class="score-value ${meta.className}">${meta.label}</span>`
 }
 
@@ -285,18 +297,49 @@ function parseProcessed(processed) {
   return null
 }
 
+function extractScorePartsFromText(processed) {
+  const text = String(processed ?? '')
+
+  // Example: "📊 Оцінка: 16/22 (72.73%)"
+  const scoreLineMatch = text.match(/(?:Оцінка|Оценка|Score)\s*:\s*(\d+(?:[.,]\d+)?)\s*\/\s*(\d+(?:[.,]\d+)?)/i)
+  if (scoreLineMatch) {
+    return {
+      total: Number(scoreLineMatch[1].replace(',', '.')),
+      max: Number(scoreLineMatch[2].replace(',', '.'))
+    }
+  }
+
+  const fractionMatch = text.match(/(\d+(?:[.,]\d+)?)\s*\/\s*(\d+(?:[.,]\d+)?)/)
+  if (fractionMatch) {
+    return {
+      total: Number(fractionMatch[1].replace(',', '.')),
+      max: Number(fractionMatch[2].replace(',', '.'))
+    }
+  }
+
+  return { total: null, max: null }
+}
+
 function extractTotalScore(processed) {
   const obj = parseProcessed(processed)
-  if (!obj) return null
-  const score = Number(obj.total_score ?? obj.score ?? obj.totalScore)
-  return Number.isFinite(score) ? score : null
+  if (obj) {
+    const score = Number(obj.total_score ?? obj.score ?? obj.totalScore)
+    if (Number.isFinite(score)) return score
+  }
+
+  const scoreParts = extractScorePartsFromText(processed)
+  return Number.isFinite(scoreParts.total) ? scoreParts.total : null
 }
 
 function extractMaxScore(processed) {
   const obj = parseProcessed(processed)
-  if (!obj) return null
-  const score = Number(obj.max_score ?? obj.maxScore)
-  return Number.isFinite(score) ? score : null
+  if (obj) {
+    const score = Number(obj.max_score ?? obj.maxScore)
+    if (Number.isFinite(score)) return score
+  }
+
+  const scoreParts = extractScorePartsFromText(processed)
+  return Number.isFinite(scoreParts.max) ? scoreParts.max : null
 }
 
 function getScoreRatio(totalScore, maxScore) {
@@ -394,15 +437,17 @@ function buildGenericViewQuery() {
 async function loadCreatedByOptions() {
   if (operatorsLoadedByPanel[activePanel]) return
   try {
-    const data = await apiFetch(`/${config().view}?select=created_by&order=created_by.asc&limit=1000`)
-    const uniqueOperators = [...new Set((data || []).map(item => (item.created_by ?? '').toString().trim()).filter(Boolean))]
+    const optionColumn = activePanel === 'chats' ? 'contact' : 'created_by'
+    const optionLabel = activePanel === 'chats' ? 'Усі контакти' : 'Усі оператори'
+    const data = await apiFetch(`/${config().view}?select=${optionColumn}&order=${optionColumn}.asc&limit=1000`)
+    const uniqueItems = [...new Set((data || []).map(item => (item[optionColumn] ?? '').toString().trim()).filter(Boolean))]
     const currentValue = els.createdBySelect.value
-    els.createdBySelect.innerHTML = '<option value="">Усі оператори</option>' +
-      uniqueOperators.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('')
-    if (uniqueOperators.includes(currentValue)) els.createdBySelect.value = currentValue
+    els.createdBySelect.innerHTML = `<option value="">${optionLabel}</option>` +
+      uniqueItems.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('')
+    if (uniqueItems.includes(currentValue)) els.createdBySelect.value = currentValue
     operatorsLoadedByPanel[activePanel] = true
   } catch (err) {
-    console.error('Помилка завантаження операторів', err)
+    console.error('Помилка завантаження списку', err)
   }
 }
 
@@ -468,7 +513,7 @@ els.tableBody.addEventListener('click', (e) => {
 
 function renderSummary(rows) {
   els.totalCount.textContent = rows.length
-  const correctCount = rows.filter(r => normalizeCorrectValue(getValue(r, ['is_correct', 'correct'])) === 1).length
+  const correctCount = rows.filter(r => normalizeCorrectValue(getValue(r, ['is_correct', 'correct']), getProcessedValue(r)) === 1).length
   const percent = rows.length ? ((correctCount / rows.length) * 100).toFixed(1) : '0.0'
   els.correctPercent.textContent = `${percent}%`
   els.correctPercent.classList.remove('score-good', 'score-bad')
@@ -501,13 +546,13 @@ function applyClientFilters(rows) {
   }
 
   if (config().endpointMode === 'generic') {
-    if (createdBy) result = result.filter(row => String(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name'])).toLowerCase() === createdBy)
+    if (createdBy) result = result.filter(row => String(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name', 'contact'])).toLowerCase() === createdBy)
     if (category) result = result.filter(row => String(getValue(row, ['case_category', 'category'])).toLowerCase().includes(category))
     if (subcategory) result = result.filter(row => String(getValue(row, ['case_subcategory', 'subcategory', 'case_sub_category'])).toLowerCase().includes(subcategory))
     if (operation) result = result.filter(row => String(getValue(row, ['case_operation_code', 'operation_code'])).toLowerCase().includes(operation))
-    if (caseDisplay) result = result.filter(row => String(getValue(row, ['case_display', 'case_name', 'case'])).toLowerCase().includes(caseDisplay))
-    if (queueDisplay) result = result.filter(row => String(getValue(row, ['queue_display', 'queue', 'queue_name'])).toLowerCase().includes(queueDisplay))
-    if (correctFilter === '1' || correctFilter === '0') result = result.filter(row => normalizeCorrectValue(getValue(row, ['is_correct', 'correct'])) === Number(correctFilter))
+    if (caseDisplay) result = result.filter(row => String(getValue(row, ['case_display', 'case_name', 'case', 'case_service'])).toLowerCase().includes(caseDisplay))
+    if (queueDisplay) result = result.filter(row => String(getValue(row, ['queue_display', 'queue', 'queue_name', 'channel'])).toLowerCase().includes(queueDisplay))
+    if (correctFilter === '1' || correctFilter === '0') result = result.filter(row => normalizeCorrectValue(getValue(row, ['is_correct', 'correct']), getProcessedValue(row)) === Number(correctFilter))
   }
 
   const minScore = minScoreRaw === '' ? null : Number(minScoreRaw)
