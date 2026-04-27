@@ -95,13 +95,17 @@ const els = {
   pageDescription: document.getElementById('pageDescription'),
   brandSubtitle: document.getElementById('brandSubtitle'),
   callsPanelBtn: document.getElementById('callsPanelBtn'),
-  chatsPanelBtn: document.getElementById('chatsPanelBtn')
+  chatsPanelBtn: document.getElementById('chatsPanelBtn'),
+  columnsBtn: document.getElementById('columnsBtn'),
+  columnsMenu: document.getElementById('columnsMenu')
 }
 
 let activePanel = 'calls'
 let currentModalText = ''
 let operatorsLoadedByPanel = { calls: false, chats: false }
 let scrollSyncLocked = false
+let currentRows = []
+
 
 els.loadBtn.addEventListener('click', loadRows)
 els.resetBtn.addEventListener('click', resetFilters)
@@ -109,6 +113,16 @@ els.closeModalBtn.addEventListener('click', closeModal)
 els.copyModalBtn.addEventListener('click', copyModalText)
 els.callsPanelBtn.addEventListener('click', () => switchPanel('calls'))
 els.chatsPanelBtn.addEventListener('click', () => switchPanel('chats'))
+els.columnsBtn.addEventListener('click', () => {
+  els.columnsMenu.classList.toggle('hidden')
+  renderColumnsMenu()
+})
+
+document.addEventListener('click', (e) => {
+  if (!els.columnsMenu.classList.contains('hidden') && !e.target.closest('.columns-control')) {
+    els.columnsMenu.classList.add('hidden')
+  }
+})
 
 els.modalOverlay.addEventListener('click', (e) => {
   if (e.target === els.modalOverlay) closeModal()
@@ -168,8 +182,156 @@ function applyPanelUi() {
   renderTableHead()
 }
 
+function columnStorageKey() {
+  return `qualityDashboardColumns_${activePanel}`
+}
+
+function getDefaultColumnState() {
+  return {
+    order: config().columns.map((_, index) => index),
+    hidden: {}
+  }
+}
+
+function getColumnState() {
+  const defaults = getDefaultColumnState()
+  try {
+    const saved = JSON.parse(localStorage.getItem(columnStorageKey()) || 'null')
+    if (!saved || !Array.isArray(saved.order)) return defaults
+
+    const validIndexes = new Set(config().columns.map((_, index) => index))
+    const cleanedOrder = saved.order.filter(index => validIndexes.has(index))
+    for (const index of validIndexes) {
+      if (!cleanedOrder.includes(index)) cleanedOrder.push(index)
+    }
+
+    return {
+      order: cleanedOrder,
+      hidden: saved.hidden && typeof saved.hidden === 'object' ? saved.hidden : {}
+    }
+  } catch {
+    return defaults
+  }
+}
+
+function saveColumnState(state) {
+  localStorage.setItem(columnStorageKey(), JSON.stringify(state))
+}
+
+function getVisibleColumns() {
+  const state = getColumnState()
+  return state.order
+    .filter(index => state.hidden[String(index)] !== true)
+    .map(index => ({ originalIndex: index, col: config().columns[index] }))
+    .filter(item => item.col)
+}
+
+function resetColumnState() {
+  localStorage.removeItem(columnStorageKey())
+  renderColumnsMenu()
+  renderTableHead()
+  renderTable(currentRows)
+  requestAnimationFrame(syncTopScrollbar)
+}
+
+function renderColumnsMenu() {
+  const state = getColumnState()
+  const rows = state.order.map(index => {
+    const col = config().columns[index]
+    if (!col) return ''
+    const checked = state.hidden[String(index)] !== true
+    return `
+      <div class="columns-menu-item" draggable="true" data-col-index="${index}">
+        <span class="drag-handle" title="Перетягнути">☰</span>
+        <label>
+          <input type="checkbox" data-action="toggle-column" data-col-index="${index}" ${checked ? 'checked' : ''}>
+          <span>${escapeHtml(col.title || 'Без назви')}</span>
+        </label>
+      </div>
+    `
+  }).join('')
+
+  els.columnsMenu.innerHTML = `
+    <div class="columns-menu-header">
+      <strong>Колонки</strong>
+      <button type="button" class="columns-reset-btn" data-action="reset-columns">Скинути</button>
+    </div>
+    <div class="columns-menu-hint">Галочка приховує/показує, перетягування міняє порядок.</div>
+    <div class="columns-menu-list">${rows}</div>
+  `
+}
+
+els.columnsMenu.addEventListener('change', (e) => {
+  const checkbox = e.target.closest('[data-action="toggle-column"]')
+  if (!checkbox) return
+
+  const index = checkbox.dataset.colIndex
+  const state = getColumnState()
+  state.hidden[index] = !checkbox.checked
+  saveColumnState(state)
+  renderTableHead()
+  renderTable(currentRows)
+  requestAnimationFrame(syncTopScrollbar)
+})
+
+els.columnsMenu.addEventListener('click', (e) => {
+  if (e.target.closest('[data-action="reset-columns"]')) resetColumnState()
+})
+
+els.columnsMenu.addEventListener('dragstart', (e) => {
+  const item = e.target.closest('.columns-menu-item')
+  if (!item) return
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', item.dataset.colIndex)
+  item.classList.add('dragging')
+})
+
+els.columnsMenu.addEventListener('dragend', (e) => {
+  const item = e.target.closest('.columns-menu-item')
+  if (item) item.classList.remove('dragging')
+})
+
+els.columnsMenu.addEventListener('dragover', (e) => {
+  if (e.target.closest('.columns-menu-item')) e.preventDefault()
+})
+
+els.columnsMenu.addEventListener('drop', (e) => {
+  const target = e.target.closest('.columns-menu-item')
+  if (!target) return
+  e.preventDefault()
+
+  const fromIndex = Number(e.dataTransfer.getData('text/plain'))
+  const toIndex = Number(target.dataset.colIndex)
+  if (!Number.isFinite(fromIndex) || !Number.isFinite(toIndex) || fromIndex === toIndex) return
+
+  const state = getColumnState()
+  const order = state.order.filter(index => index !== fromIndex)
+  const insertAt = order.indexOf(toIndex)
+  order.splice(insertAt, 0, fromIndex)
+  state.order = order
+  saveColumnState(state)
+
+  renderColumnsMenu()
+  renderTableHead()
+  renderTable(currentRows)
+  requestAnimationFrame(syncTopScrollbar)
+})
+
 function renderTableHead() {
-  els.tableHead.innerHTML = `<tr>${config().columns.map(col => `<th>${escapeHtml(col.title)}</th>`).join('')}</tr>`
+  const cols = getVisibleColumns()
+
+  let colgroup = els.qualityTable.querySelector('colgroup')
+  if (!colgroup) {
+    colgroup = document.createElement('colgroup')
+    els.qualityTable.insertBefore(colgroup, els.qualityTable.firstChild)
+  }
+
+  colgroup.innerHTML = cols.map(item => {
+    const isTextCol = item.originalIndex >= config().columns.length - 2
+    return `<col class="${isTextCol ? 'text-col' : 'fixed-col'}">`
+  }).join('')
+
+  els.tableHead.innerHTML = `<tr>${cols.map(item => `<th data-col-index="${item.originalIndex}">${escapeHtml(item.col.title)}</th>`).join('')}</tr>`
   els.tableWrap.scrollLeft = 0
   els.topScrollWrap.scrollLeft = 0
 }
@@ -494,14 +656,16 @@ function renderTextCell(text, type, row) {
 }
 
 function renderTable(rows) {
+  const cols = getVisibleColumns()
+
   if (!rows || rows.length === 0) {
-    els.tableBody.innerHTML = `<tr><td colspan="${config().columns.length}" class="empty">Немає даних</td></tr>`
+    els.tableBody.innerHTML = `<tr><td colspan="${cols.length || 1}" class="empty">Немає даних</td></tr>`
     requestAnimationFrame(syncTopScrollbar)
     return
   }
 
   els.tableBody.innerHTML = rows.map(row => `
-    <tr>${config().columns.map(col => `<td>${col.render(row)}</td>`).join('')}</tr>
+    <tr>${cols.map(item => `<td data-col-index="${item.originalIndex}">${item.col.render(row)}</td>`).join('')}</tr>
   `).join('')
 
   requestAnimationFrame(syncTopScrollbar)
@@ -580,10 +744,11 @@ async function loadRows() {
     setStatus(`Завантаження даних: ${config().title.toLowerCase()}...`)
     const data = await apiFetch(buildQuery())
     const rows = applyClientFilters(data || [])
+    currentRows = rows
     renderTable(rows)
     renderSummary(rows)
     setStatus(`Завантажено записів: ${rows.length}`)
-    setupResizableColumns()
+    // setupResizableColumns() disabled: column widths/order are controlled by colgroup + column menu
     requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
