@@ -741,9 +741,9 @@ table th {
 #qualityTable.calls-table td:nth-child(13),
 #qualityTable.calls-table th:nth-child(14),
 #qualityTable.calls-table td:nth-child(14) {
-  width: 420px;
-  min-width: 420px;
-  max-width: 420px;
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
   text-align: left;
   vertical-align: top;
 }
@@ -783,9 +783,9 @@ table th {
 #qualityTable.chats-table td:nth-child(11),
 #qualityTable.chats-table th:nth-child(12),
 #qualityTable.chats-table td:nth-child(12) {
-  width: 420px;
-  min-width: 420px;
-  max-width: 420px;
+  width: 200px;
+  min-width: 200px;
+  max-width: 200px;
   text-align: left;
   vertical-align: top;
 }
