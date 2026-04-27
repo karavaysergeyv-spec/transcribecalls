@@ -893,7 +893,7 @@ table th {
 #qualityTable td:nth-child(11),
 #qualityTable th:nth-child(12),
 #qualityTable td:nth-child(12) {
-  width: 400px;
-  min-width: 400px;
-  max-width: 600px;
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
 }
