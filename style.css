@@ -866,3 +866,27 @@ table th {
   display: inline-flex;
   margin-left: 0 !important;
 }
+/* Центр по умолчанию */
+#callsTable th,
+#callsTable td {
+  text-align: center !important;
+}
+
+/* Последние 2 колонки — влево */
+#callsTable td:nth-child(11),
+#callsTable td:nth-child(12) {
+  text-align: left !important;
+}
+
+/* ВНУТРЕННИЙ текст (это ключевое!) */
+#callsTable td:nth-child(11) .transcription,
+#callsTable td:nth-child(12) .transcription {
+  text-align: left !important;
+  display: block;
+}
+
+/* Кнопки тоже влево */
+#callsTable td:nth-child(11) .open-full-btn,
+#callsTable td:nth-child(12) .open-full-btn {
+  justify-content: flex-start !important;
+}
