@@ -719,9 +719,9 @@ table th {
 /* Calls: first 12 columns are compact */
 #qualityTable.calls-table th:nth-child(-n+12),
 #qualityTable.calls-table td:nth-child(-n+12) {
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
 }
 
 /* Calls: score and correctness columns are narrower */
@@ -741,9 +741,9 @@ table th {
 #qualityTable.calls-table td:nth-child(13),
 #qualityTable.calls-table th:nth-child(14),
 #qualityTable.calls-table td:nth-child(14) {
-  width: 200px;
-  min-width: 200px;
-  max-width: 200px;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
   text-align: left;
   vertical-align: top;
 }
@@ -761,9 +761,9 @@ table th {
 /* Chats: first 10 columns are compact */
 #qualityTable.chats-table th:nth-child(-n+10),
 #qualityTable.chats-table td:nth-child(-n+10) {
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
 }
 
 /* Chats: score and correctness columns are narrower */
@@ -783,9 +783,9 @@ table th {
 #qualityTable.chats-table td:nth-child(11),
 #qualityTable.chats-table th:nth-child(12),
 #qualityTable.chats-table td:nth-child(12) {
-  width: 200px;
-  min-width: 200px;
-  max-width: 200px;
+  width: 150px;
+  min-width: 150px;
+  max-width: 150px;
   text-align: left;
   vertical-align: top;
 }
