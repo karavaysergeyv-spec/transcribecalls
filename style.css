@@ -890,3 +890,26 @@ table th {
 #callsTable td:nth-child(12) .open-full-btn {
   justify-content: flex-start !important;
 }
+/* 1. Все по центру (база) */
+#callsTable td,
+#callsTable th {
+  text-align: center !important;
+}
+
+/* 2. Две последние колонки — влево */
+#callsTable td:nth-child(11),
+#callsTable td:nth-child(12) {
+  text-align: left !important;
+}
+
+/* 3. ВЕСЬ контент внутри этих колонок — влево */
+#callsTable td:nth-child(11) *,
+#callsTable td:nth-child(12) * {
+  text-align: left !important;
+}
+
+/* 4. Кнопки прижимаем влево */
+#callsTable td:nth-child(11) .open-full-btn,
+#callsTable td:nth-child(12) .open-full-btn {
+  justify-content: flex-start !important;
+}
