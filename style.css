@@ -808,9 +808,9 @@ table th {
 #qualityTable.calls-table td:not(:nth-last-child(-n+2)),
 #qualityTable.chats-table th:not(:nth-last-child(-n+2)),
 #qualityTable.chats-table td:not(:nth-last-child(-n+2)) {
-  width: 90px !important;
-  min-width: 90px !important;
-  max-width: 90px !important;
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
 }
 
 /* Последние 2 — широкие */
