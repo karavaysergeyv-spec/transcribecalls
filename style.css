@@ -1027,3 +1027,35 @@ table th {
   max-width: 600px;
   width: 400px;
 }
+/* === ВАЖНО: разделяем таблицы === */
+
+/* 📞 CALLS — нормальная авто-ширина */
+#callsTable {
+  table-layout: auto !important;
+  min-width: 1400px;
+}
+
+/* 💬 CHATS — фиксированная таблица */
+#qualityTable {
+  table-layout: fixed;
+  min-width: 1800px;
+}
+/* 📞 CALLS */
+#callsTable th:nth-child(-n+12),
+#callsTable td:nth-child(-n+12) {
+  width: 110px;
+}
+
+/* 💬 CHATS */
+#qualityTable th:nth-child(-n+10),
+#qualityTable td:nth-child(-n+10) {
+  width: 110px;
+}
+
+/* чат колонки */
+#qualityTable th:nth-child(11),
+#qualityTable td:nth-child(11),
+#qualityTable th:nth-child(12),
+#qualityTable td:nth-child(12) {
+  width: 400px;
+}
