@@ -599,7 +599,7 @@ function setupResizableColumns() {
     if (th.dataset.resizableReady === '1') return
     th.classList.add('resizable')
     th.dataset.resizableReady = '1'
-    if (!th.style.width) th.style.width = `${Math.max(th.offsetWidth, 120)}px`
+//    if (!th.style.width) th.style.width = `${Math.max(th.offsetWidth, 120)}px`
     const handle = document.createElement('span')
     handle.className = 'resize-handle'
     th.appendChild(handle)
