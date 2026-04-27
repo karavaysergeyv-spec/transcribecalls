@@ -867,3 +867,33 @@ table th {
   justify-content: flex-start !important;
   margin-left: 0 !important;
 }
+/* === ШИРИНЫ КАК В CALLS === */
+
+/* фикс ширины для всех колонок кроме последних двух */
+#qualityTable th:nth-child(-n+10),
+#qualityTable td:nth-child(-n+10) {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+}
+
+/* score колонки */
+#qualityTable th:nth-child(4),
+#qualityTable td:nth-child(4),
+#qualityTable th:nth-child(5),
+#qualityTable td:nth-child(5) {
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
+}
+
+/* === ПОСЛЕДНИЕ 2 КОЛОНКИ (чат) === */
+
+#qualityTable th:nth-child(11),
+#qualityTable td:nth-child(11),
+#qualityTable th:nth-child(12),
+#qualityTable td:nth-child(12) {
+  width: 400px;
+  min-width: 400px;
+  max-width: 600px;
+}
