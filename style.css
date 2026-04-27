@@ -696,114 +696,27 @@ table th {
    Calls panel: 14 columns
    Chats panel: 12 columns
    The table gets class .calls-table or .chats-table from script.js
+
+   Goal:
+   - every column except the last 2 is fixed
+   - last 2 columns are wide text columns
    ========================================================= */
 
 #qualityTable {
-  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  table-layout: fixed;
+  table-layout: fixed !important;
 }
 
 #qualityTable th,
 #qualityTable td {
   text-align: center;
   vertical-align: middle;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ---------- Calls: 14 columns ---------- */
-#qualityTable.calls-table {
-  min-width: 2100px;
-}
-
-/* Calls: first 12 columns are compact */
-#qualityTable.calls-table th:nth-child(-n+12),
-#qualityTable.calls-table td:nth-child(-n+12) {
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-}
-
-/* Calls: score and correctness columns are narrower */
-#qualityTable.calls-table th:nth-child(5),
-#qualityTable.calls-table td:nth-child(5),
-#qualityTable.calls-table th:nth-child(6),
-#qualityTable.calls-table td:nth-child(6),
-#qualityTable.calls-table th:nth-child(12),
-#qualityTable.calls-table td:nth-child(12) {
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-}
-
-/* Calls: last 2 text columns */
-#qualityTable.calls-table th:nth-child(13),
-#qualityTable.calls-table td:nth-child(13),
-#qualityTable.calls-table th:nth-child(14),
-#qualityTable.calls-table td:nth-child(14) {
-  width: 150px;
-  min-width: 150px;
-  max-width: 150px;
-  text-align: left;
-  vertical-align: top;
-}
-
-#qualityTable.calls-table td:nth-child(13) *,
-#qualityTable.calls-table td:nth-child(14) * {
-  text-align: left;
-}
-
-/* ---------- Chats: 12 columns ---------- */
-#qualityTable.chats-table {
-  min-width: 1880px;
-}
-
-/* Chats: first 10 columns are compact */
-#qualityTable.chats-table th:nth-child(-n+10),
-#qualityTable.chats-table td:nth-child(-n+10) {
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-}
-
-/* Chats: score and correctness columns are narrower */
-#qualityTable.chats-table th:nth-child(4),
-#qualityTable.chats-table td:nth-child(4),
-#qualityTable.chats-table th:nth-child(5),
-#qualityTable.chats-table td:nth-child(5),
-#qualityTable.chats-table th:nth-child(10),
-#qualityTable.chats-table td:nth-child(10) {
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-}
-
-/* Chats: last 2 text columns */
-#qualityTable.chats-table th:nth-child(11),
-#qualityTable.chats-table td:nth-child(11),
-#qualityTable.chats-table th:nth-child(12),
-#qualityTable.chats-table td:nth-child(12) {
-  width: 150px;
-  min-width: 150px;
-  max-width: 150px;
-  text-align: left;
-  vertical-align: top;
-}
-
-#qualityTable.chats-table td:nth-child(11) *,
-#qualityTable.chats-table td:nth-child(12) * {
-  text-align: left;
-}
-
-#qualityTable.calls-table td:nth-child(13) .open-full-btn,
-#qualityTable.calls-table td:nth-child(14) .open-full-btn,
-#qualityTable.chats-table td:nth-child(11) .open-full-btn,
-#qualityTable.chats-table td:nth-child(12) .open-full-btn {
-  margin-left: 0;
-  margin-right: auto;
-}
-/* NEW */
-/* Все столбцы кроме последних 2 — фикс */
+/* Compact columns: never wrap and never grow */
 #qualityTable.calls-table th:not(:nth-last-child(-n+2)),
 #qualityTable.calls-table td:not(:nth-last-child(-n+2)),
 #qualityTable.chats-table th:not(:nth-last-child(-n+2)),
@@ -811,19 +724,43 @@ table th {
   width: 80px !important;
   min-width: 80px !important;
   max-width: 80px !important;
+  white-space: nowrap;
 }
 
-/* Последние 2 — широкие */
+/* Calls: 12 fixed columns x 80px + 2 text columns x 420px = 1800px */
+#qualityTable.calls-table {
+  width: 1800px !important;
+  min-width: 1800px !important;
+  max-width: 1800px !important;
+}
+
+/* Chats: 10 fixed columns x 80px + 2 text columns x 420px = 1640px */
+#qualityTable.chats-table {
+  width: 1640px !important;
+  min-width: 1640px !important;
+  max-width: 1640px !important;
+}
+
+/* Last 2 columns are wide text columns */
 #qualityTable.calls-table th:nth-last-child(-n+2),
 #qualityTable.calls-table td:nth-last-child(-n+2),
 #qualityTable.chats-table th:nth-last-child(-n+2),
 #qualityTable.chats-table td:nth-last-child(-n+2) {
-  width: 150px !important;
-  min-width: 150px !important;
-  max-width: 150px !important;
-  text-align: center !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
+  text-align: left !important;
   vertical-align: top !important;
+  white-space: normal;
 }
 
+#qualityTable.calls-table td:nth-last-child(-n+2) *,
+#qualityTable.chats-table td:nth-last-child(-n+2) * {
+  text-align: left !important;
+}
 
-
+#qualityTable.calls-table td:nth-last-child(-n+2) .open-full-btn,
+#qualityTable.chats-table td:nth-last-child(-n+2) .open-full-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
