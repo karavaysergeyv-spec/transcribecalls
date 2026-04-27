@@ -966,11 +966,11 @@ table th {
 }
 
 #qualityTable col.fixed-col {
-  width: 90px !important;
+  width: 100px !important;
 }
 
 #qualityTable col.text-col {
-  width: 420px !important;
+  width: 150px !important;
 }
 
 /* Neutralize previous nth-child width rules so colgroup controls layout. */
