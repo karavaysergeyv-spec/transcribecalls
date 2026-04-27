@@ -944,9 +944,9 @@ table th {
 #callsTable td:nth-child(13),
 #callsTable th:nth-child(14),
 #callsTable td:nth-child(14) {
-  width: 420px !important;
-  min-width: 420px !important;
-  max-width: 620px !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
   text-align: left !important;
 }
 
@@ -979,9 +979,9 @@ table th {
 #qualityTable td:nth-child(11),
 #qualityTable th:nth-child(12),
 #qualityTable td:nth-child(12) {
-  width: 420px !important;
-  min-width: 420px !important;
-  max-width: 620px !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
   text-align: left !important;
   vertical-align: top !important;
 }
