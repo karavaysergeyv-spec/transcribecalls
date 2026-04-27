@@ -473,7 +473,7 @@ th.resizable {
   top: 0;
   right: 0;
   width: 8px;
-  height: 90%;
+  height: 100%;
   cursor: col-resize;
   user-select: none;
 }
