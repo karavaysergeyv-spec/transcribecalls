@@ -169,20 +169,7 @@ function applyPanelUi() {
 }
 
 function renderTableHead() {
-  const columns = config().columns
-
-  let colgroup = els.qualityTable.querySelector('colgroup')
-  if (!colgroup) {
-    colgroup = document.createElement('colgroup')
-    els.qualityTable.insertBefore(colgroup, els.qualityTable.firstChild)
-  }
-
-  colgroup.innerHTML = columns.map((_, index) => {
-    const isTextColumn = index >= columns.length - 2
-    return `<col class="${isTextColumn ? 'text-col' : 'fixed-col'}">`
-  }).join('')
-
-  els.tableHead.innerHTML = `<tr>${columns.map(col => `<th>${escapeHtml(col.title)}</th>`).join('')}</tr>`
+  els.tableHead.innerHTML = `<tr>${config().columns.map(col => `<th>${escapeHtml(col.title)}</th>`).join('')}</tr>`
   els.tableWrap.scrollLeft = 0
   els.topScrollWrap.scrollLeft = 0
 }
@@ -596,7 +583,7 @@ async function loadRows() {
     renderTable(rows)
     renderSummary(rows)
     setStatus(`Завантажено записів: ${rows.length}`)
-    // setupResizableColumns()
+    setupResizableColumns()
     requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
