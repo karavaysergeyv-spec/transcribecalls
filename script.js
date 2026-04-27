@@ -53,9 +53,7 @@ const PANEL_CONFIG = {
       { title: 'Сервіс', render: row => escapeHtml(getValue(row, ['case_service'])) },
       { title: 'Коректність', render: row => renderCorrectnessCell(getValue(row, ['is_correct']), getProcessedValue(row)) },
       { title: 'Original dialogue', render: row => renderTextCell(getRawValue(row), 'raw', row) },
-      { title: 'Analyzed chat', render: row => renderTextCell(getProcessedValue(row), 'processed', row) },
-      { title: '', render: () => '' },
-      { title: '', render: () => '' }
+      { title: 'Analyzed chat', render: row => renderTextCell(getProcessedValue(row), 'processed', row) }
     ]
   }
 }
@@ -153,6 +151,8 @@ function switchPanel(panel) {
 
 function applyPanelUi() {
   const cfg = config()
+  els.qualityTable.classList.toggle('calls-table', activePanel === 'calls')
+  els.qualityTable.classList.toggle('chats-table', activePanel === 'chats')
   document.title = cfg.title
   els.pageTitle.textContent = cfg.title
   els.pageDescription.textContent = cfg.description
@@ -170,6 +170,8 @@ function applyPanelUi() {
 
 function renderTableHead() {
   els.tableHead.innerHTML = `<tr>${config().columns.map(col => `<th>${escapeHtml(col.title)}</th>`).join('')}</tr>`
+  els.tableWrap.scrollLeft = 0
+  els.topScrollWrap.scrollLeft = 0
 }
 
 function setStatus(message, isError = false) {
