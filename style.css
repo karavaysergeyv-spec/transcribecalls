@@ -992,3 +992,19 @@ table th {
 #qualityTable td:nth-child(12) * {
   text-align: left;
 }
+/* Empty technical columns for chats: keep 14-column layout without visible content */
+#qualityTable th:nth-child(13),
+#qualityTable td:nth-child(13),
+#qualityTable th:nth-child(14),
+#qualityTable td:nth-child(14) {
+  width: 1px !important;
+  min-width: 1px !important;
+  max-width: 1px !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  color: transparent !important;
+  overflow: hidden !important;
+}
+
