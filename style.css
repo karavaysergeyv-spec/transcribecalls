@@ -865,9 +865,9 @@ table th {
 /* All columns except last 2: fixed, compact, one line */
 #qualityTable th:not(:nth-last-child(-n+2)),
 #qualityTable td:not(:nth-last-child(-n+2)) {
-  width: 80px !important;
-  min-width: 80px !important;
-  max-width: 80px !important;
+  width: 100px !important;
+  min-width: 100px !important;
+  max-width: 100px !important;
   white-space: nowrap !important;
   text-align: center !important;
   vertical-align: middle !important;
@@ -876,9 +876,9 @@ table th {
 /* Last 2 columns: wide text columns */
 #qualityTable th:nth-last-child(-n+2),
 #qualityTable td:nth-last-child(-n+2) {
-  width: 420px !important;
-  min-width: 420px !important;
-  max-width: 420px !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
   white-space: normal !important;
   text-align: left !important;
   vertical-align: top !important;
