@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Панель дзвінків</title>
+  <title>Rockpay Quality Dashboard</title>
   <link rel="stylesheet" href="./style.css" />
 </head>
 <body>
@@ -15,7 +15,7 @@
       </div>
       <div class="brand-copy">
         <div class="brand-name">rockpay</div>
-        <div class="brand-subtitle">Call Quality Dashboard</div>
+        <div class="brand-subtitle" id="brandSubtitle">Call Quality Dashboard</div>
       </div>
     </div>
   </header>
@@ -24,19 +24,19 @@
     <section class="hero-card">
       <div class="hero-copy">
         <div class="eyebrow">Workspace</div>
-        <h1>Панель дзвінків</h1>
-        <p>Транскрібація Creatio · контроль якості · аналітика операторів</p>
+        <div class="dashboard-switch" aria-label="Перемикач панелей">
+          <button id="callsPanelBtn" class="panel-tab active" type="button" data-panel="calls">Панель дзвінків</button>
+          <button id="chatsPanelBtn" class="panel-tab" type="button" data-panel="chats">Панель чатів</button>
+        </div>
+        <h1 id="pageTitle">Панель дзвінків</h1>
+        <p id="pageDescription">Транскрібація Creatio · контроль якості · аналітика операторів</p>
       </div>
     </section>
 
     <section class="panel filters">
       <div class="field field-search">
         <label for="searchInput">Загальний пошук</label>
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="Номер, оператор, категорія, черга, транскрипція"
-        />
+        <input id="searchInput" type="text" placeholder="Номер, оператор, категорія, черга, транскрипція" />
       </div>
 
       <div class="field">
@@ -46,59 +46,34 @@
         </select>
       </div>
 
-      <div class="field">
+      <div class="field" id="fromCodeField">
         <label for="fromCodeInput">Код оператора</label>
-        <input
-          id="fromCodeInput"
-          type="text"
-          placeholder="099, 066, 097"
-          maxlength="3"
-        />
+        <input id="fromCodeInput" type="text" placeholder="099, 066, 097" maxlength="3" />
       </div>
 
       <div class="field">
         <label for="caseCategoryInput">Категорія</label>
-        <input
-          id="caseCategoryInput"
-          type="text"
-          placeholder="Перевірка платежу"
-        />
+        <input id="caseCategoryInput" type="text" placeholder="Перевірка платежу" />
       </div>
 
       <div class="field">
         <label for="caseSubcategoryInput">Під категорія</label>
-        <input
-          id="caseSubcategoryInput"
-          type="text"
-          placeholder="Успішний платіж"
-        />
+        <input id="caseSubcategoryInput" type="text" placeholder="Успішний платіж" />
       </div>
 
       <div class="field">
         <label for="caseOperationCodeInput">Операція</label>
-        <input
-          id="caseOperationCodeInput"
-          type="text"
-          placeholder="1018018758"
-        />
+        <input id="caseOperationCodeInput" type="text" placeholder="1018018758" />
       </div>
 
       <div class="field">
         <label for="caseDisplayInput">Кейс</label>
-        <input
-          id="caseDisplayInput"
-          type="text"
-          placeholder="C2C"
-        />
+        <input id="caseDisplayInput" type="text" placeholder="C2C" />
       </div>
 
       <div class="field">
         <label for="queueDisplayInput">Черга</label>
-        <input
-          id="queueDisplayInput"
-          type="text"
-          placeholder="Оператори call center"
-        />
+        <input id="queueDisplayInput" type="text" placeholder="Оператори call center" />
       </div>
 
       <div class="field">
@@ -167,29 +142,10 @@
       </div>
 
       <div id="tableWrap" class="table-wrap">
-        <table id="callsTable">
-          <thead>
-            <tr>
-              <th>Дата</th>
-              <th>Оператор</th>
-              <th>Звідки</th>
-              <th>Куди</th>
-              <th>Total score</th>
-              <th>Max score</th>
-              <th>Категорія</th>
-              <th>Підкатегорія</th>
-              <th>Код операції</th>
-              <th>Кейс</th>
-              <th>Черга</th>
-              <th>Коректність</th>
-              <th>Raw транскрібація</th>
-              <th>Результат</th>
-            </tr>
-          </thead>
-          <tbody id="callsBody">
-            <tr>
-              <td colspan="14" class="empty">Немає даних</td>
-            </tr>
+        <table id="qualityTable">
+          <thead id="tableHead"></thead>
+          <tbody id="tableBody">
+            <tr><td colspan="14" class="empty">Немає даних</td></tr>
           </tbody>
         </table>
       </div>
