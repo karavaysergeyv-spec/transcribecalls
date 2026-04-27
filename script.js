@@ -52,8 +52,8 @@ const PANEL_CONFIG = {
       { title: 'Код операції', render: row => escapeHtml(getValue(row, ['case_operation_code'])) },
       { title: 'Сервіс', render: row => escapeHtml(getValue(row, ['case_service'])) },
       { title: 'Коректність', render: row => renderCorrectnessCell(getValue(row, ['is_correct']), getProcessedValue(row)) },
-      { title: 'Original dialogue', render: row => renderTextCell(getRawValue(row), 'raw', row) },
-      { title: 'Analyzed chat', render: row => renderTextCell(getProcessedValue(row), 'processed', row) }
+      { title: 'Raw діалог', render: row => renderTextCell(getRawValue(row), 'raw', row) },
+      { title: 'Результат', render: row => renderTextCell(getProcessedValue(row), 'processed', row) }
     ]
   }
 }
