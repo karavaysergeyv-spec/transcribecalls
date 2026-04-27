@@ -818,9 +818,9 @@ table th {
 #qualityTable.calls-table td:nth-last-child(-n+2),
 #qualityTable.chats-table th:nth-last-child(-n+2),
 #qualityTable.chats-table td:nth-last-child(-n+2) {
-  width: 420px !important;
-  min-width: 420px !important;
-  max-width: 620px !important;
+  width: 200px !important;
+  min-width: 200px !important;
+  max-width: 200px !important;
   text-align: left !important;
   vertical-align: top !important;
 }
