@@ -913,20 +913,20 @@ table th {
 #callsTable td:nth-child(12) .open-full-btn {
   justify-content: flex-start !important;
 }
+/* ==============================
+   CLEAN FINAL CONFIG
+   ============================== */
 
-/* =========================================================
-   FINAL SAFE OVERRIDES
-   Calls: 14 columns, first 12 fixed.
-   Chats: 12 columns, first 10 fixed, last 2 wide text columns.
-   ========================================================= */
+/* 📞 CALLS */
+#callsTable {
+  table-layout: auto;
+}
 
 #callsTable th:nth-child(-n+12),
 #callsTable td:nth-child(-n+12) {
-  width: 110px !important;
-  min-width: 110px !important;
-  max-width: 110px !important;
-  text-align: center !important;
-  vertical-align: middle !important;
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
 }
 
 #callsTable th:nth-child(5),
@@ -935,121 +935,46 @@ table th {
 #callsTable td:nth-child(6),
 #callsTable th:nth-child(12),
 #callsTable td:nth-child(12) {
-  width: 90px !important;
-  min-width: 90px !important;
-  max-width: 90px !important;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
 }
 
+/* последние 2 (текст) */
 #callsTable th:nth-child(13),
 #callsTable td:nth-child(13),
 #callsTable th:nth-child(14),
 #callsTable td:nth-child(14) {
-  width: 420px !important;
-  min-width: 420px !important;
-  max-width: 620px !important;
-  text-align: left !important;
+  width: 420px;
+  min-width: 420px;
+  max-width: 600px;
+  text-align: left;
 }
 
 #callsTable td:nth-child(13) *,
 #callsTable td:nth-child(14) * {
-  text-align: left !important;
+  text-align: left;
+}
+
+/* 💬 CHATS */
+#qualityTable {
+  table-layout: fixed;
 }
 
 #qualityTable th:nth-child(-n+10),
 #qualityTable td:nth-child(-n+10) {
-  width: 110px !important;
-  min-width: 110px !important;
-  max-width: 110px !important;
-  text-align: center !important;
-  vertical-align: middle !important;
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
 }
 
 #qualityTable th:nth-child(4),
 #qualityTable td:nth-child(4),
 #qualityTable th:nth-child(5),
-#qualityTable td:nth-child(5),
-#qualityTable th:nth-child(10),
-#qualityTable td:nth-child(10) {
-  width: 90px !important;
-  min-width: 90px !important;
-  max-width: 90px !important;
-}
-
-#qualityTable th:nth-child(11),
-#qualityTable td:nth-child(11),
-#qualityTable th:nth-child(12),
-#qualityTable td:nth-child(12) {
-  width: 420px !important;
-  min-width: 420px !important;
-  max-width: 620px !important;
-  text-align: left !important;
-  vertical-align: top !important;
-}
-
-#qualityTable td:nth-child(11) *,
-#qualityTable td:nth-child(12) * {
-  text-align: left !important;
-}
-
-#qualityTable td:nth-child(11) .open-full-btn,
-#qualityTable td:nth-child(12) .open-full-btn,
-#callsTable td:nth-child(13) .open-full-btn,
-#callsTable td:nth-child(14) .open-full-btn {
-  margin-left: 0 !important;
-  margin-right: auto !important;
-}
-/* =========================
-   WIDTH FIX (НЕ ЛОМАЕТ ВЕРСТКУ)
-   ========================= */
-
-/* 📞 CALLS — фикс первые 12 из 14 */
-#callsTable th:nth-child(-n+12),
-#callsTable td:nth-child(-n+12) {
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
-}
-
-/* 💬 CHATS — фикс первые 10 из 12 */
-#qualityTable th:nth-child(-n+10),
-#qualityTable td:nth-child(-n+10) {
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
-}
-
-/* 💬 последние 2 колонки (чат) — широкие */
-#qualityTable th:nth-child(11),
-#qualityTable td:nth-child(11),
-#qualityTable th:nth-child(12),
-#qualityTable td:nth-child(12) {
-  min-width: 350px;
-  max-width: 600px;
-  width: 400px;
-}
-/* === ВАЖНО: разделяем таблицы === */
-
-/* 📞 CALLS — нормальная авто-ширина */
-#callsTable {
-  table-layout: auto !important;
-  min-width: 1400px;
-}
-
-/* 💬 CHATS — фиксированная таблица */
-#qualityTable {
-  table-layout: fixed;
-  min-width: 1800px;
-}
-/* 📞 CALLS */
-#callsTable th:nth-child(-n+12),
-#callsTable td:nth-child(-n+12) {
-  width: 110px;
-}
-
-/* 💬 CHATS */
-#qualityTable th:nth-child(-n+10),
-#qualityTable td:nth-child(-n+10) {
-  width: 110px;
+#qualityTable td:nth-child(5) {
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
 }
 
 /* чат колонки */
@@ -1057,5 +982,13 @@ table th {
 #qualityTable td:nth-child(11),
 #qualityTable th:nth-child(12),
 #qualityTable td:nth-child(12) {
-  width: 400px;
+  width: 420px;
+  min-width: 420px;
+  max-width: 600px;
+  text-align: left;
+}
+
+#qualityTable td:nth-child(11) *,
+#qualityTable td:nth-child(12) * {
+  text-align: left;
 }
