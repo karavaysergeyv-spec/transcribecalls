@@ -826,26 +826,4 @@ table th {
 }
 
 
-/* ЖЁСТКО фиксируем поведение ячеек */
-#qualityTable {
-  table-layout: fixed !important;
-}
-
-/* все колонки кроме последних 2 */
-#qualityTable th:not(:nth-last-child(-n+2)),
-#qualityTable td:not(:nth-last-child(-n+2)) {
-  width: 90px !important;
-  max-width: 90px !important;
-  min-width: 90px !important;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* последние 2 колонки */
-#qualityTable th:nth-last-child(-n+2),
-#qualityTable td:nth-last-child(-n+2) {
-  width: auto !important;
-  white-space: normal;
-}
 
