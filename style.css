@@ -835,3 +835,18 @@ table th {
   min-width: 90px;
   max-width: 90px;
 }
+
+/* По умолчанию — ВСЁ по центру */
+#callsTable th,
+#callsTable td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Последние 2 колонки (Original / Analyzed) — влево */
+#callsTable th:nth-last-child(2),
+#callsTable td:nth-last-child(2),
+#callsTable th:nth-last-child(1),
+#callsTable td:nth-last-child(1) {
+  text-align: left;
+}
