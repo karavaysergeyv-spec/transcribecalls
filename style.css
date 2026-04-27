@@ -719,9 +719,9 @@ table th {
 /* Calls: first 12 columns are compact */
 #qualityTable.calls-table th:nth-child(-n+12),
 #qualityTable.calls-table td:nth-child(-n+12) {
-  width: 100px;
-  min-width: 100px;
-  max-width: 100px;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
 }
 
 /* Calls: score and correctness columns are narrower */
@@ -761,9 +761,9 @@ table th {
 /* Chats: first 10 columns are compact */
 #qualityTable.chats-table th:nth-child(-n+10),
 #qualityTable.chats-table td:nth-child(-n+10) {
-  width: 100px;
-  min-width: 100px;
-  max-width: 100px;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
 }
 
 /* Chats: score and correctness columns are narrower */
