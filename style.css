@@ -654,116 +654,16 @@ th.resizing {
   }
 }
 
+/* ===== Compact table density ===== */
 table th,
 table td {
   padding: 7px 7px !important;
   font-size: 13px;
 }
+
 table th {
   text-align: center !important;
   vertical-align: middle;
-}
-/* По умолчанию — текст слева */
-#callsTable th,
-#callsTable td {
-  text-align: left;
-  vertical-align: middle;
-}
-
-/* ЧИСЛОВЫЕ КОЛОНКИ — по центру */
-#callsTable th:nth-child(1),
-#callsTable td:nth-child(1) {
-  text-align: center;
-      width: 110px;
-  min-width: 110px;
-  max-width: 110px;  
-}
-#callsTable th:nth-child(2),
-#callsTable td:nth-child(2) {
-  text-align: center;
-        width: 110px;
-  min-width: 110px;
-  max-width: 110px; 
-}
-#callsTable th:nth-child(3),
-#callsTable td:nth-child(3) {
-  text-align: center;
-   width: 110px;
-  min-width: 110px;
-  max-width: 110px;  
-}
-#callsTable th:nth-child(4),
-#callsTable td:nth-child(4) {
-  text-align: center;
-     width: 110px;
-  min-width: 110px;
-  max-width: 110px;  
-}
-/* Total score */
-#callsTable th:nth-child(5),
-#callsTable td:nth-child(5) {
-  text-align: center;
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;  
-}
-
-
-/* Max score */
-#callsTable th:nth-child(6),
-#callsTable td:nth-child(6) {
-  text-align: center;
-    width: 90px;
-  min-width: 90px;
-  max-width: 90px;  
-}
-/* Max score */
-#callsTable th:nth-child(7),
-#callsTable td:nth-child(7) {
-  text-align: center;
-     width: 110px;
-  min-width: 110px;
-  max-width: 110px;  
-}
-/* Max score */
-#callsTable th:nth-child(8),
-#callsTable td:nth-child(8) {
-  text-align: center;
-      width: 110px;
-  min-width: 110px;
-  max-width: 110px;  
-}
-/* Код операції */
-#callsTable th:nth-child(9),
-#callsTable td:nth-child(9) {
-  text-align: center;
-       width: 110px;
-  min-width: 110px;
-  max-width: 110px; 
-}
-/* Код операції */
-#callsTable th:nth-child(10),
-#callsTable td:nth-child(10) {
-  text-align: center;
-      width: 110px;
-  min-width: 110px;
-  max-width: 110px; 
-}
-/* Код операції */
-#callsTable th:nth-child(11),
-#callsTable td:nth-child(11) {
-  text-align: center;
-     width: 120px;
-  min-width: 120px;
-  max-width: 120px;
-}
-/* Коректність */
-#callsTable th:nth-child(12),
-#callsTable td:nth-child(12) {
-  text-align: center;
-      width: 90px;
-  min-width: 90px;
-  max-width: 90px;  
 }
 
 .dashboard-switch {
@@ -791,220 +691,114 @@ table th {
   display: none;
 }
 
-#qualityTable th,
-#qualityTable td {
-  text-align: left;
-  vertical-align: middle;
-}
+/* =========================================================
+   ONE DYNAMIC TABLE (#qualityTable)
+   Calls panel: 14 columns
+   Chats panel: 12 columns
+   The table gets class .calls-table or .chats-table from script.js
+   ========================================================= */
 
-#qualityTable th:nth-child(-n+12),
-#qualityTable td:nth-child(-n+12) {
-  text-align: center;
-}
-
-#qualityTable th:nth-child(1),
-#qualityTable td:nth-child(1),
-#qualityTable th:nth-child(2),
-#qualityTable td:nth-child(2),
-#qualityTable th:nth-child(3),
-#qualityTable td:nth-child(3),
-#qualityTable th:nth-child(4),
-#qualityTable td:nth-child(4),
-#qualityTable th:nth-child(7),
-#qualityTable td:nth-child(7),
-#qualityTable th:nth-child(8),
-#qualityTable td:nth-child(8),
-#qualityTable th:nth-child(9),
-#qualityTable td:nth-child(9),
-#qualityTable th:nth-child(10),
-#qualityTable td:nth-child(10),
-#qualityTable th:nth-child(11),
-#qualityTable td:nth-child(11) {
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
-}
-
-#qualityTable th:nth-child(5),
-#qualityTable td:nth-child(5),
-#qualityTable th:nth-child(6),
-#qualityTable td:nth-child(6),
-#qualityTable th:nth-child(12),
-#qualityTable td:nth-child(12) {
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-}
-
-/* По умолчанию — ВСЁ по центру */
-#callsTable th,
-#callsTable td {
-  text-align: center;
-  vertical-align: middle;
-}
-
-/* Все колонки по центру */
-#callsTable th,
-#callsTable td {
-  text-align: center !important;
-  vertical-align: middle !important;
-}
-
-/* Original dialogue и Analyzed chat */
-#callsTable th:nth-child(11),
-#callsTable td:nth-child(11),
-#callsTable th:nth-child(12),
-#callsTable td:nth-child(12),
-#callsTable td:nth-child(11) .transcription,
-#callsTable td:nth-child(12) .transcription {
-  text-align: left !important;
-}
-
-/* Кнопка внутри этих колонок */
-#callsTable td:nth-child(11) .open-full-btn,
-#callsTable td:nth-child(12) .open-full-btn {
-  display: inline-flex;
-  margin-left: 0 !important;
-}
-/* Центр по умолчанию */
-#callsTable th,
-#callsTable td {
-  text-align: center !important;
-}
-
-/* Последние 2 колонки — влево */
-#callsTable td:nth-child(11),
-#callsTable td:nth-child(12) {
-  text-align: left !important;
-}
-
-/* ВНУТРЕННИЙ текст (это ключевое!) */
-#callsTable td:nth-child(11) .transcription,
-#callsTable td:nth-child(12) .transcription {
-  text-align: left !important;
-  display: block;
-}
-
-/* Кнопки тоже влево */
-#callsTable td:nth-child(11) .open-full-btn,
-#callsTable td:nth-child(12) .open-full-btn {
-  justify-content: flex-start !important;
-}
-/* 1. Все по центру (база) */
-#callsTable td,
-#callsTable th {
-  text-align: center !important;
-}
-
-/* 2. Две последние колонки — влево */
-#callsTable td:nth-child(11),
-#callsTable td:nth-child(12) {
-  text-align: left !important;
-}
-
-/* 3. ВЕСЬ контент внутри этих колонок — влево */
-#callsTable td:nth-child(11) *,
-#callsTable td:nth-child(12) * {
-  text-align: left !important;
-}
-
-/* 4. Кнопки прижимаем влево */
-#callsTable td:nth-child(11) .open-full-btn,
-#callsTable td:nth-child(12) .open-full-btn {
-  justify-content: flex-start !important;
-}
-/* ==============================
-   CLEAN FINAL CONFIG
-   ============================== */
-
-/* 📞 CALLS */
-#callsTable {
-  table-layout: auto;
-}
-
-#callsTable th:nth-child(-n+12),
-#callsTable td:nth-child(-n+12) {
-  width: 110px;
-  min-width: 110px;
-  max-width: 110px;
-}
-
-#callsTable th:nth-child(5),
-#callsTable td:nth-child(5),
-#callsTable th:nth-child(6),
-#callsTable td:nth-child(6),
-#callsTable th:nth-child(12),
-#callsTable td:nth-child(12) {
-  width: 90px;
-  min-width: 90px;
-  max-width: 90px;
-}
-
-/* последние 2 (текст) */
-#callsTable th:nth-child(13),
-#callsTable td:nth-child(13),
-#callsTable th:nth-child(14),
-#callsTable td:nth-child(14) {
-  width: 420px;
-  min-width: 420px;
-  max-width: 600px;
-  text-align: left;
-}
-
-#callsTable td:nth-child(13) *,
-#callsTable td:nth-child(14) * {
-  text-align: left;
-}
-
-/* 💬 CHATS */
 #qualityTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
   table-layout: fixed;
 }
 
-#qualityTable th:nth-child(-n+10),
-#qualityTable td:nth-child(-n+10) {
+#qualityTable th,
+#qualityTable td {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ---------- Calls: 14 columns ---------- */
+#qualityTable.calls-table {
+  min-width: 2100px;
+}
+
+/* Calls: first 12 columns are compact */
+#qualityTable.calls-table th:nth-child(-n+12),
+#qualityTable.calls-table td:nth-child(-n+12) {
   width: 110px;
   min-width: 110px;
   max-width: 110px;
 }
 
-#qualityTable th:nth-child(4),
-#qualityTable td:nth-child(4),
-#qualityTable th:nth-child(5),
-#qualityTable td:nth-child(5) {
+/* Calls: score and correctness columns are narrower */
+#qualityTable.calls-table th:nth-child(5),
+#qualityTable.calls-table td:nth-child(5),
+#qualityTable.calls-table th:nth-child(6),
+#qualityTable.calls-table td:nth-child(6),
+#qualityTable.calls-table th:nth-child(12),
+#qualityTable.calls-table td:nth-child(12) {
   width: 90px;
   min-width: 90px;
   max-width: 90px;
 }
 
-/* чат колонки */
-#qualityTable th:nth-child(11),
-#qualityTable td:nth-child(11),
-#qualityTable th:nth-child(12),
-#qualityTable td:nth-child(12) {
+/* Calls: last 2 text columns */
+#qualityTable.calls-table th:nth-child(13),
+#qualityTable.calls-table td:nth-child(13),
+#qualityTable.calls-table th:nth-child(14),
+#qualityTable.calls-table td:nth-child(14) {
   width: 420px;
   min-width: 420px;
-  max-width: 600px;
+  max-width: 420px;
+  text-align: left;
+  vertical-align: top;
+}
+
+#qualityTable.calls-table td:nth-child(13) *,
+#qualityTable.calls-table td:nth-child(14) * {
   text-align: left;
 }
 
-#qualityTable td:nth-child(11) *,
-#qualityTable td:nth-child(12) * {
-  text-align: left;
-}
-/* Empty technical columns for chats: keep 14-column layout without visible content */
-#qualityTable th:nth-child(13),
-#qualityTable td:nth-child(13),
-#qualityTable th:nth-child(14),
-#qualityTable td:nth-child(14) {
-  width: 1px !important;
-  min-width: 1px !important;
-  max-width: 1px !important;
-  padding-left: 0 !important;
-  padding-right: 0 !important;
-  border-left: none !important;
-  border-right: none !important;
-  color: transparent !important;
-  overflow: hidden !important;
+/* ---------- Chats: 12 columns ---------- */
+#qualityTable.chats-table {
+  min-width: 1880px;
 }
 
+/* Chats: first 10 columns are compact */
+#qualityTable.chats-table th:nth-child(-n+10),
+#qualityTable.chats-table td:nth-child(-n+10) {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+}
+
+/* Chats: score and correctness columns are narrower */
+#qualityTable.chats-table th:nth-child(4),
+#qualityTable.chats-table td:nth-child(4),
+#qualityTable.chats-table th:nth-child(5),
+#qualityTable.chats-table td:nth-child(5),
+#qualityTable.chats-table th:nth-child(10),
+#qualityTable.chats-table td:nth-child(10) {
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
+}
+
+/* Chats: last 2 text columns */
+#qualityTable.chats-table th:nth-child(11),
+#qualityTable.chats-table td:nth-child(11),
+#qualityTable.chats-table th:nth-child(12),
+#qualityTable.chats-table td:nth-child(12) {
+  width: 420px;
+  min-width: 420px;
+  max-width: 420px;
+  text-align: left;
+  vertical-align: top;
+}
+
+#qualityTable.chats-table td:nth-child(11) *,
+#qualityTable.chats-table td:nth-child(12) * {
+  text-align: left;
+}
+
+#qualityTable.calls-table td:nth-child(13) .open-full-btn,
+#qualityTable.calls-table td:nth-child(14) .open-full-btn,
+#qualityTable.chats-table td:nth-child(11) .open-full-btn,
+#qualityTable.chats-table td:nth-child(12) .open-full-btn {
+  margin-left: 0;
+  margin-right: auto;
+}
