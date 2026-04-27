@@ -824,6 +824,20 @@ table th {
   text-align: center !important;
   vertical-align: top !important;
 }
+/* Перенос текста во всех ячейках */
+#qualityTable th,
+#qualityTable td {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  text-overflow: clip !important;
+}
 
+/* Текстовые блоки тоже переносятся */
+#qualityTable .transcription {
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
 
 
