@@ -827,3 +827,74 @@ table th {
 
 
 
+
+
+/* =========================================================
+   FINAL COLGROUP WIDTH CONTROL
+   Source of truth for table column widths:
+   - JS creates <col class="fixed-col"> for all columns except last 2
+   - JS creates <col class="text-col"> for last 2 columns
+   ========================================================= */
+
+#qualityTable {
+  table-layout: fixed !important;
+}
+
+#qualityTable.calls-table {
+  min-width: 1800px !important;
+}
+
+#qualityTable.chats-table {
+  min-width: 1640px !important;
+}
+
+#qualityTable col.fixed-col {
+  width: 80px !important;
+}
+
+#qualityTable col.text-col {
+  width: 420px !important;
+}
+
+#qualityTable th,
+#qualityTable td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* All columns except last 2: fixed, compact, one line */
+#qualityTable th:not(:nth-last-child(-n+2)),
+#qualityTable td:not(:nth-last-child(-n+2)) {
+  width: 80px !important;
+  min-width: 80px !important;
+  max-width: 80px !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+}
+
+/* Last 2 columns: wide text columns */
+#qualityTable th:nth-last-child(-n+2),
+#qualityTable td:nth-last-child(-n+2) {
+  width: 420px !important;
+  min-width: 420px !important;
+  max-width: 420px !important;
+  white-space: normal !important;
+  text-align: left !important;
+  vertical-align: top !important;
+}
+
+#qualityTable td:nth-last-child(-n+2) *,
+#qualityTable td:nth-last-child(-n+1) * {
+  text-align: left !important;
+}
+
+#qualityTable td:nth-last-child(-n+2) .open-full-btn {
+  margin-left: 0 !important;
+  margin-right: auto !important;
+}
+
+/* Resize handles disabled together with setupResizableColumns() */
+#qualityTable .resize-handle {
+  display: none !important;
+}
