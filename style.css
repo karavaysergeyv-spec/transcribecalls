@@ -998,3 +998,32 @@ table th {
   margin-left: 0 !important;
   margin-right: auto !important;
 }
+/* =========================
+   WIDTH FIX (НЕ ЛОМАЕТ ВЕРСТКУ)
+   ========================= */
+
+/* 📞 CALLS — фикс первые 12 из 14 */
+#callsTable th:nth-child(-n+12),
+#callsTable td:nth-child(-n+12) {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+}
+
+/* 💬 CHATS — фикс первые 10 из 12 */
+#qualityTable th:nth-child(-n+10),
+#qualityTable td:nth-child(-n+10) {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+}
+
+/* 💬 последние 2 колонки (чат) — широкие */
+#qualityTable th:nth-child(11),
+#qualityTable td:nth-child(11),
+#qualityTable th:nth-child(12),
+#qualityTable td:nth-child(12) {
+  min-width: 350px;
+  max-width: 600px;
+  width: 400px;
+}
