@@ -843,13 +843,6 @@ table th {
   vertical-align: middle;
 }
 
-/* Последние 2 колонки (Original / Analyzed) — влево */
-#callsTable th:nth-last-child(2),
-#callsTable td:nth-last-child(2),
-#callsTable th:nth-last-child(1),
-#callsTable td:nth-last-child(1) {
-  text-align: left;
-}
 /* Все колонки по центру */
 #callsTable th,
 #callsTable td {
@@ -857,17 +850,19 @@ table th {
   vertical-align: middle !important;
 }
 
-/* Последние 2 колонки: Original dialogue / Analyzed chat — по левому краю */
-#callsTable th:nth-child(13),
-#callsTable td:nth-child(13),
-#callsTable th:nth-child(14),
-#callsTable td:nth-child(14),
-#callsTable td:nth-child(13) .transcription,
-#callsTable td:nth-child(14) .transcription {
+/* Original dialogue и Analyzed chat */
+#callsTable th:nth-child(11),
+#callsTable td:nth-child(11),
+#callsTable th:nth-child(12),
+#callsTable td:nth-child(12),
+#callsTable td:nth-child(11) .transcription,
+#callsTable td:nth-child(12) .transcription {
   text-align: left !important;
 }
-#callsTable td:nth-child(13) .open-full-btn,
-#callsTable td:nth-child(14) .open-full-btn {
+
+/* Кнопка внутри этих колонок */
+#callsTable td:nth-child(11) .open-full-btn,
+#callsTable td:nth-child(12) .open-full-btn {
   display: inline-flex;
   margin-left: 0 !important;
 }
