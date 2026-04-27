@@ -802,3 +802,25 @@ table th {
   margin-left: 0;
   margin-right: auto;
 }
+/* NEW */
+/* Все столбцы кроме последних 2 — фикс */
+#qualityTable.calls-table th:not(:nth-last-child(-n+2)),
+#qualityTable.calls-table td:not(:nth-last-child(-n+2)),
+#qualityTable.chats-table th:not(:nth-last-child(-n+2)),
+#qualityTable.chats-table td:not(:nth-last-child(-n+2)) {
+  width: 90px !important;
+  min-width: 90px !important;
+  max-width: 90px !important;
+}
+
+/* Последние 2 — широкие */
+#qualityTable.calls-table th:nth-last-child(-n+2),
+#qualityTable.calls-table td:nth-last-child(-n+2),
+#qualityTable.chats-table th:nth-last-child(-n+2),
+#qualityTable.chats-table td:nth-last-child(-n+2) {
+  width: 420px !important;
+  min-width: 420px !important;
+  max-width: 620px !important;
+  text-align: left !important;
+  vertical-align: top !important;
+}
