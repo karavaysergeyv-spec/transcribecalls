@@ -106,7 +106,6 @@ let operatorsLoadedByPanel = { calls: false, chats: false }
 let scrollSyncLocked = false
 let currentRows = []
 
-
 els.loadBtn.addEventListener('click', loadRows)
 els.resetBtn.addEventListener('click', resetFilters)
 els.closeModalBtn.addEventListener('click', closeModal)
@@ -153,9 +152,22 @@ function config() {
   return PANEL_CONFIG[activePanel]
 }
 
+function getSelectedCreatedByValues() {
+  return Array.from(els.createdBySelect.selectedOptions || [])
+    .map(option => option.value.trim())
+    .filter(Boolean)
+}
+
+function clearCreatedBySelection() {
+  Array.from(els.createdBySelect.options || []).forEach(option => {
+    option.selected = false
+  })
+}
+
 function switchPanel(panel) {
   if (!PANEL_CONFIG[panel] || activePanel === panel) return
   activePanel = panel
+  operatorsLoadedByPanel[panel] = false
   els.callsPanelBtn.classList.toggle('active', panel === 'calls')
   els.chatsPanelBtn.classList.toggle('active', panel === 'chats')
   resetFilters(false)
@@ -177,7 +189,7 @@ function applyPanelUi() {
   document.querySelector('label[for=queueDisplayInput]').textContent = activePanel === 'chats' ? 'Канал' : 'Черга'
   els.caseDisplayInput.placeholder = activePanel === 'chats' ? 'Сервіс' : 'C2C'
   els.queueDisplayInput.placeholder = activePanel === 'chats' ? 'monobank-web' : 'Оператори call center'
-  els.createdBySelect.innerHTML = `<option value="">${activePanel === 'chats' ? 'Усі контакти' : 'Усі оператори'}</option>`
+  els.createdBySelect.innerHTML = ''
   els.fromCodeField.classList.toggle('hidden', !cfg.showFromCode)
   renderTableHead()
 }
@@ -343,7 +355,7 @@ function setStatus(message, isError = false) {
 
 function resetFilters(shouldLoad = true) {
   els.searchInput.value = ''
-  els.createdBySelect.value = ''
+  clearCreatedBySelection()
   els.fromCodeInput.value = ''
   els.caseCategoryInput.value = ''
   els.caseSubcategoryInput.value = ''
@@ -465,8 +477,6 @@ function parseProcessed(processed) {
 
 function extractScorePartsFromText(processed) {
   const text = String(processed ?? '')
-
-  // Example: "📊 Оцінка: 16/22 (72.73%)"
   const scoreLineMatch = text.match(/(?:Оцінка|Оценка|Score)\s*:\s*(\d+(?:[.,]\d+)?)\s*\/\s*(\d+(?:[.,]\d+)?)/i)
   if (scoreLineMatch) {
     return {
@@ -569,8 +579,17 @@ function buildCallsViewQuery() {
   params.set('order', 'created_on.desc')
   params.set('limit', String(Number(els.limitSelect.value) || 50))
 
+  const selectedOperators = getSelectedCreatedByValues()
+
+  if (selectedOperators.length === 1) {
+    params.set('created_by', `eq.${selectedOperators[0]}`)
+  }
+
+  if (selectedOperators.length > 1) {
+    params.set('created_by', `in.(${selectedOperators.map(v => `"${v.replaceAll('"', '\\"')}"`).join(',')})`)
+  }
+
   const map = [
-    [els.createdBySelect.value.trim(), 'created_by', 'eq'],
     [els.caseCategoryInput.value.trim(), 'case_category', 'ilike'],
     [els.caseSubcategoryInput.value.trim(), 'case_subcategory', 'ilike'],
     [els.caseOperationCodeInput.value.trim(), 'case_operation_code', 'ilike'],
@@ -604,13 +623,20 @@ async function loadCreatedByOptions() {
   if (operatorsLoadedByPanel[activePanel]) return
   try {
     const optionColumn = activePanel === 'chats' ? 'contact' : 'created_by'
-    const optionLabel = activePanel === 'chats' ? 'Усі контакти' : 'Усі оператори'
     const data = await apiFetch(`/${config().view}?select=${optionColumn}&order=${optionColumn}.asc&limit=1000`)
     const uniqueItems = [...new Set((data || []).map(item => (item[optionColumn] ?? '').toString().trim()).filter(Boolean))]
-    const currentValue = els.createdBySelect.value
-    els.createdBySelect.innerHTML = `<option value="">${optionLabel}</option>` +
-      uniqueItems.map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`).join('')
-    if (uniqueItems.includes(currentValue)) els.createdBySelect.value = currentValue
+
+    const currentValues = getSelectedCreatedByValues()
+
+    els.createdBySelect.innerHTML =
+      uniqueItems
+        .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+        .join('')
+
+    Array.from(els.createdBySelect.options).forEach(option => {
+      option.selected = currentValues.includes(option.value)
+    })
+
     operatorsLoadedByPanel[activePanel] = true
   } catch (err) {
     console.error('Помилка завантаження списку', err)
@@ -701,7 +727,7 @@ function applyClientFilters(rows) {
   const fromCodeFilter = els.fromCodeInput.value.trim()
   const minScoreRaw = els.totalScoreMin.value.trim()
   const maxScoreRaw = els.totalScoreMax.value.trim()
-  const createdBy = els.createdBySelect.value.trim().toLowerCase()
+  const createdByList = getSelectedCreatedByValues().map(value => value.toLowerCase())
   const category = els.caseCategoryInput.value.trim().toLowerCase()
   const subcategory = els.caseSubcategoryInput.value.trim().toLowerCase()
   const operation = els.caseOperationCodeInput.value.trim().toLowerCase()
@@ -709,12 +735,18 @@ function applyClientFilters(rows) {
   const queueDisplay = els.queueDisplayInput.value.trim().toLowerCase()
   const correctFilter = els.correctFilter.value
 
+  if (createdByList.length) {
+    result = result.filter(row => {
+      const value = String(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name', 'contact'])).toLowerCase()
+      return createdByList.includes(value)
+    })
+  }
+
   if (config().showFromCode && fromCodeFilter) {
     result = result.filter(row => normalizePhoneForPrefix(getValue(row, ['from_number', 'caller_id', 'client_phone', 'phone'])).startsWith(fromCodeFilter))
   }
 
   if (config().endpointMode === 'generic') {
-    if (createdBy) result = result.filter(row => String(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name', 'contact'])).toLowerCase() === createdBy)
     if (category) result = result.filter(row => String(getValue(row, ['case_category', 'category'])).toLowerCase().includes(category))
     if (subcategory) result = result.filter(row => String(getValue(row, ['case_subcategory', 'subcategory', 'case_sub_category'])).toLowerCase().includes(subcategory))
     if (operation) result = result.filter(row => String(getValue(row, ['case_operation_code', 'operation_code'])).toLowerCase().includes(operation))
@@ -725,14 +757,21 @@ function applyClientFilters(rows) {
 
   const minScore = minScoreRaw === '' ? null : Number(minScoreRaw)
   const maxScore = maxScoreRaw === '' ? null : Number(maxScoreRaw)
-  if (minScore !== null && Number.isFinite(minScore)) result = result.filter(row => {
-    const score = extractTotalScore(getProcessedValue(row))
-    return score !== null && score >= minScore
-  })
-  if (maxScore !== null && Number.isFinite(maxScore)) result = result.filter(row => {
-    const score = extractTotalScore(getProcessedValue(row))
-    return score !== null && score <= maxScore
-  })
+
+  if (minScore !== null && Number.isFinite(minScore)) {
+    result = result.filter(row => {
+      const score = extractTotalScore(getProcessedValue(row))
+      return score !== null && score >= minScore
+    })
+  }
+
+  if (maxScore !== null && Number.isFinite(maxScore)) {
+    result = result.filter(row => {
+      const score = extractTotalScore(getProcessedValue(row))
+      return score !== null && score <= maxScore
+    })
+  }
+
   if (search) result = result.filter(row => rowMatchesSearch(row, search))
 
   return result
@@ -748,7 +787,6 @@ async function loadRows() {
     renderTable(rows)
     renderSummary(rows)
     setStatus(`Завантажено записів: ${rows.length}`)
-    // setupResizableColumns() disabled: column widths/order are controlled by colgroup + column menu
     requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
@@ -764,7 +802,6 @@ function setupResizableColumns() {
     if (th.dataset.resizableReady === '1') return
     th.classList.add('resizable')
     th.dataset.resizableReady = '1'
-//    if (!th.style.width) th.style.width = `${Math.max(th.offsetWidth, 120)}px`
     const handle = document.createElement('span')
     handle.className = 'resize-handle'
     th.appendChild(handle)
