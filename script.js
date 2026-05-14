@@ -619,14 +619,34 @@ function buildGenericViewQuery() {
   return `/${config().view}?${params.toString()}`
 }
 
-async function loadCreatedByOptions() {
+sync function loadCreatedByOptions() {
   if (operatorsLoadedByPanel[activePanel]) return
+
   try {
     const optionColumn = activePanel === 'chats' ? 'contact' : 'created_by'
-    const data = await apiFetch(`/${config().view}?select=${optionColumn}&order=${optionColumn}.asc&limit=1000`)
-    const uniqueItems = [...new Set((data || []).map(item => (item[optionColumn] ?? '').toString().trim()).filter(Boolean))]
-
     const currentValues = getSelectedCreatedByValues()
+
+    let allRows = []
+    const pageSize = 1000
+    let offset = 0
+
+    while (true) {
+      const data = await apiFetch(
+        `/${config().view}?select=${optionColumn}&${optionColumn}=not.is.null&order=${optionColumn}.asc&limit=${pageSize}&offset=${offset}`
+      )
+
+      const chunk = data || []
+      allRows = allRows.concat(chunk)
+
+      if (chunk.length < pageSize) break
+      offset += pageSize
+    }
+
+    const uniqueItems = [...new Set(
+      allRows
+        .map(item => (item[optionColumn] ?? '').toString().trim())
+        .filter(Boolean)
+    )].sort((a, b) => a.localeCompare(b, 'uk'))
 
     els.createdBySelect.innerHTML =
       uniqueItems
