@@ -1003,3 +1003,12 @@ table th {
   overflow-wrap: anywhere !important;
   word-break: break-word !important;
 }
+#createdBySelect[multiple] {
+  height: 150px;
+  padding: 8px;
+}
+
+#createdBySelect[multiple] option {
+  padding: 6px 8px;
+  border-radius: 8px;
+}
