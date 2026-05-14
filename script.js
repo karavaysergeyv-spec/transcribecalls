@@ -1,5 +1,5 @@
 const API_BASE = 'https://108.143.242.121'
-const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIiLCJleHAiOjE3Nzg2NzM5NDB9.OaxjGNMyrQZGTCwFoaMzVFWSlVll4jR4xmVWJYzXX_A'
+const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIifQ.9QleIf2PnFan3-0q11AqCQYQXCnfTMbRGRSeaoLRtYA'
 
 const PANEL_CONFIG = {
   calls: {
