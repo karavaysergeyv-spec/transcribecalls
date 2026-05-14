@@ -619,7 +619,7 @@ function buildGenericViewQuery() {
   return `/${config().view}?${params.toString()}`
 }
 
-sync function loadCreatedByOptions() {
+async function loadCreatedByOptions() {
   if (operatorsLoadedByPanel[activePanel]) return
 
   try {
@@ -632,7 +632,7 @@ sync function loadCreatedByOptions() {
 
     while (true) {
       const data = await apiFetch(
-        `/${config().view}?select=${optionColumn}&${optionColumn}=not.is.null&order=${optionColumn}.asc&limit=${pageSize}&offset=${offset}`
+        `/${config().view}?select=${optionColumn}&limit=${pageSize}&offset=${offset}`
       )
 
       const chunk = data || []
@@ -648,10 +648,9 @@ sync function loadCreatedByOptions() {
         .filter(Boolean)
     )].sort((a, b) => a.localeCompare(b, 'uk'))
 
-    els.createdBySelect.innerHTML =
-      uniqueItems
-        .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
-        .join('')
+    els.createdBySelect.innerHTML = uniqueItems
+      .map(name => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
+      .join('')
 
     Array.from(els.createdBySelect.options).forEach(option => {
       option.selected = currentValues.includes(option.value)
@@ -660,6 +659,7 @@ sync function loadCreatedByOptions() {
     operatorsLoadedByPanel[activePanel] = true
   } catch (err) {
     console.error('Помилка завантаження списку', err)
+    setStatus(`Помилка завантаження операторів: ${err.message}`, true)
   }
 }
 
