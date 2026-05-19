@@ -408,8 +408,13 @@ function getProcessedValue(row) {
 
 function formatDateTime(value) {
   if (!value) return ''
+
   const d = new Date(value)
   if (Number.isNaN(d.getTime())) return value
+
+  // -3 часа
+  d.setHours(d.getHours() - 3)
+
   return d.toLocaleString('uk-UA')
 }
 
