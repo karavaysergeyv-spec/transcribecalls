@@ -58,7 +58,7 @@ const PANEL_CONFIG = {
   }
   ,
   transcribe: {
-    view: 'public.calls_no_transcribe',
+    view: 'calls_no_transcribe',
     title: 'Транскрибувати запис',
     subtitle: 'Transcribe Record',
     description: 'Транскрибування записів · контроль якості',
