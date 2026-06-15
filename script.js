@@ -1,6 +1,17 @@
 const API_BASE = 'https://108.143.242.121'
 const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIifQ.9QleIf2PnFan3-0q11AqCQYQXCnfTMbRGRSeaoLRtYA'
 
+const CALLS_SELECT_COLUMNS = [
+  'created_on', 'created_by', 'from_number', 'to_number', 'operator_score', 'case_category',
+  'case_subcategory', 'case_operation_code', 'case_display', 'queue_display', 'is_correct',
+  'raw_transcription', 'processed_transcription'
+]
+
+const TRANSCRIBE_SELECT_COLUMNS = [
+  'created_on', 'created_by', 'from_number', 'to_number', 'duration_seconds', 'operator_score',
+  'case_category', 'case_subcategory', 'case_operation_code', 'case_display', 'queue_display'
+]
+
 const PANEL_CONFIG = {
   calls: {
     view: 'calls_view',
@@ -13,6 +24,7 @@ const PANEL_CONFIG = {
     textType: 'транскрібація',
     showFromCode: true,
     endpointMode: 'calls',
+    selectColumns: CALLS_SELECT_COLUMNS,
     columns: [
       { title: 'Дата', render: row => escapeHtml(formatDateTime(getValue(row, ['created_on', 'created_at', 'date']))) },
       { title: 'Оператор', render: row => escapeHtml(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name'])) },
@@ -68,21 +80,20 @@ const PANEL_CONFIG = {
     textType: 'транскрібація',
     showFromCode: true,
     endpointMode: 'calls',
+    selectColumns: TRANSCRIBE_SELECT_COLUMNS,
+    supportsCorrectness: false,
     columns: [
       { title: 'Дата', render: row => escapeHtml(formatDateTime(getValue(row, ['created_on', 'created_at', 'date']))) },
       { title: 'Оператор', render: row => escapeHtml(getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name'])) },
       { title: 'Звідки', render: row => escapeHtml(getValue(row, ['from_number', 'caller_id', 'client_phone', 'phone'])) },
       { title: 'Куди', render: row => escapeHtml(getValue(row, ['to_number', 'called_id', 'queue_number'])) },
-      { title: 'Total score', render: row => renderTotalScoreCell(getProcessedValue(row)) },
-      { title: 'Max score', render: row => renderMaxScoreCell(getProcessedValue(row)) },
+      { title: 'Тривалість, с', render: row => escapeHtml(getValue(row, ['duration_seconds'])) },
+      { title: 'Оцінка оператора', render: row => renderOperatorScoreCell(row) },
       { title: 'Категорія', render: row => escapeHtml(getValue(row, ['case_category', 'category'])) },
       { title: 'Підкатегорія', render: row => escapeHtml(getValue(row, ['case_subcategory', 'subcategory', 'case_sub_category'])) },
       { title: 'Код операції', render: row => escapeHtml(getValue(row, ['case_operation_code', 'operation_code'])) },
       { title: 'Кейс', render: row => escapeHtml(getValue(row, ['case_display', 'case_name', 'case'])) },
-      { title: 'Черга', render: row => escapeHtml(getValue(row, ['queue_display', 'queue', 'queue_name'])) },
-      { title: 'Коректність', render: row => renderCorrectnessCell(getValue(row, ['is_correct', 'correct'])) },
-      { title: 'Raw транскрібація', render: row => renderTextCell(getRawValue(row), 'raw', row) },
-      { title: 'Результат', render: row => renderTextCell(getProcessedValue(row), 'processed', row) }
+      { title: 'Черга', render: row => escapeHtml(getValue(row, ['queue_display', 'queue', 'queue_name'])) }
     ]
   }
 }
@@ -226,6 +237,9 @@ function applyPanelUi() {
   els.queueDisplayInput.placeholder = activePanel === 'chats' ? 'monobank-web' : 'Оператори call center'
   els.createdBySelect.innerHTML = ''
   els.fromCodeField.classList.toggle('hidden', !cfg.showFromCode)
+  const supportsCorrectness = cfg.supportsCorrectness !== false
+  els.correctFilter.disabled = !supportsCorrectness
+  els.correctFilter.closest('.field')?.classList.toggle('hidden', !supportsCorrectness)
   renderTableHead()
 }
 
@@ -441,6 +455,16 @@ function getProcessedValue(row) {
   ])
 }
 
+function getOperatorScore(row) {
+  const score = Number(getValue(row, ['operator_score']))
+  return Number.isFinite(score) ? score : null
+}
+
+function getRowScore(row) {
+  const processedScore = extractTotalScore(getProcessedValue(row))
+  return processedScore !== null ? processedScore : getOperatorScore(row)
+}
+
 function formatDateTime(value) {
   if (!value) return ''
 
@@ -578,6 +602,12 @@ function renderMaxScoreCell(processed) {
   return `<span class="score-value">${escapeHtml(maxScore)}</span>`
 }
 
+function renderOperatorScoreCell(row) {
+  const score = getOperatorScore(row)
+  if (score === null) return '<span class="score-value">—</span>'
+  return `<span class="score-value">${escapeHtml(score)}</span>`
+}
+
 function syncTopScrollbar() {
   const tableWidth = els.qualityTable.scrollWidth
   const containerWidth = els.tableWrap.clientWidth
@@ -611,11 +641,7 @@ function buildQuery() {
 
 function buildCallsViewQuery() {
   const params = new URLSearchParams()
-  params.set('select', [
-    'created_on', 'created_by', 'from_number', 'to_number', 'operator_score', 'case_category',
-    'case_subcategory', 'case_operation_code', 'case_display', 'queue_display', 'is_correct',
-    'raw_transcription', 'processed_transcription'
-  ].join(','))
+  params.set('select', (config().selectColumns || CALLS_SELECT_COLUMNS).join(','))
   params.set('order', 'created_on.desc')
   params.set('limit', String(Number(els.limitSelect.value) || 50))
 
@@ -639,7 +665,9 @@ function buildCallsViewQuery() {
 
   if (els.dateFrom.value) params.append('created_on', `gte.${els.dateFrom.value}T00:00:00`)
   if (els.dateTo.value) params.append('created_on', `lte.${els.dateTo.value}T23:59:59`)
-  if (els.correctFilter.value === '1' || els.correctFilter.value === '0') params.set('is_correct', `eq.${Number(els.correctFilter.value)}`)
+  if (config().supportsCorrectness !== false && (els.correctFilter.value === '1' || els.correctFilter.value === '0')) {
+    params.set('is_correct', `eq.${Number(els.correctFilter.value)}`)
+  }
 
   map.forEach(([value, column, op]) => {
     if (!value) return
@@ -767,6 +795,11 @@ els.tableBody.addEventListener('click', (e) => {
 
 function renderSummary(rows) {
   els.totalCount.textContent = rows.length
+  if (config().supportsCorrectness === false) {
+    els.correctPercent.textContent = '—'
+    els.correctPercent.classList.remove('score-good', 'score-bad')
+    return
+  }
   const correctCount = rows.filter(r => normalizeCorrectValue(getValue(r, ['is_correct', 'correct']), getProcessedValue(r)) === 1).length
   const percent = rows.length ? ((correctCount / rows.length) * 100).toFixed(1) : '0.0'
   els.correctPercent.textContent = `${percent}%`
@@ -820,14 +853,14 @@ function applyClientFilters(rows) {
 
   if (minScore !== null && Number.isFinite(minScore)) {
     result = result.filter(row => {
-      const score = extractTotalScore(getProcessedValue(row))
+      const score = getRowScore(row)
       return score !== null && score >= minScore
     })
   }
 
   if (maxScore !== null && Number.isFinite(maxScore)) {
     result = result.filter(row => {
-      const score = extractTotalScore(getProcessedValue(row))
+      const score = getRowScore(row)
       return score !== null && score <= maxScore
     })
   }
