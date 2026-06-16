@@ -684,15 +684,29 @@ async function apiFetch(path, options = {}) {
   return payload
 }
 
-function buildQuery() {
-  return config().endpointMode === 'calls' ? buildCallsViewQuery() : buildGenericViewQuery()
+function buildQuery(options = {}) {
+  return config().endpointMode === 'calls' ? buildCallsViewQuery(options) : buildGenericViewQuery(options)
 }
 
-function buildCallsViewQuery() {
+function getSelectedLimit() {
+  const value = els.limitSelect.value
+  if (value === 'all') return 'all'
+  return Number(value) || config().defaultLimit || 50
+}
+
+function applyQueryLimit(params, options = {}) {
+  const selectedLimit = getSelectedLimit()
+  const limit = options.limit ?? selectedLimit
+
+  if (limit !== 'all') params.set('limit', String(limit))
+  if (Number.isFinite(options.offset)) params.set('offset', String(options.offset))
+}
+
+function buildCallsViewQuery(options = {}) {
   const params = new URLSearchParams()
   params.set('select', (config().selectColumns || CALLS_SELECT_COLUMNS).join(','))
   params.set('order', 'created_on.desc')
-  params.set('limit', String(Number(els.limitSelect.value) || 50))
+  applyQueryLimit(params, options)
 
   const selectedOperators = getSelectedCreatedByValues()
 
@@ -726,14 +740,33 @@ function buildCallsViewQuery() {
   return `/${config().view}?${params.toString()}`
 }
 
-function buildGenericViewQuery() {
+function buildGenericViewQuery(options = {}) {
   const params = new URLSearchParams()
   params.set('select', '*')
   params.set('order', 'created_on.desc')
-  params.set('limit', String(Number(els.limitSelect.value) || 50))
+  applyQueryLimit(params, options)
   if (els.dateFrom.value) params.append('created_on', `gte.${els.dateFrom.value}T00:00:00`)
   if (els.dateTo.value) params.append('created_on', `lte.${els.dateTo.value}T23:59:59`)
   return `/${config().view}?${params.toString()}`
+}
+
+async function loadQueryRows() {
+  if (getSelectedLimit() !== 'all') return apiFetch(buildQuery())
+
+  const pageSize = 1000
+  let offset = 0
+  let allRows = []
+
+  while (true) {
+    const chunk = await apiFetch(buildQuery({ limit: pageSize, offset }))
+    const rows = chunk || []
+    allRows = allRows.concat(rows)
+
+    if (rows.length < pageSize) break
+    offset += pageSize
+  }
+
+  return allRows
 }
 
 async function loadCreatedByOptions() {
@@ -1231,8 +1264,9 @@ function applyClientFilters(rows) {
 async function loadRows() {
   try {
     await loadCreatedByOptions()
-    setStatus(`Завантаження даних: ${config().title.toLowerCase()}...`)
-    const data = await apiFetch(buildQuery())
+    const isLoadingAll = getSelectedLimit() === 'all'
+    setStatus(`Завантаження даних: ${config().title.toLowerCase()}${isLoadingAll ? ' · всі записи' : ''}...`)
+    const data = await loadQueryRows()
     const rows = applyClientFilters(data || [])
     currentRows = rows
     if (config().isAnalytics === true) {
