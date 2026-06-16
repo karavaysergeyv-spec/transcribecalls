@@ -1,5 +1,6 @@
 const API_BASE = 'https://108.143.242.121'
 const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYXBpX3VzZXIifQ.9QleIf2PnFan3-0q11AqCQYQXCnfTMbRGRSeaoLRtYA'
+const TRANSCRIBE_WEBHOOK_URL = 'https://n8n.terminals.com.ua:24443/webhook/7f05adb8-4714-43a4-add9-f865a69e08fa'
 
 const CALLS_SELECT_COLUMNS = [
   'created_on', 'created_by', 'from_number', 'to_number', 'operator_score', 'case_category',
@@ -8,7 +9,7 @@ const CALLS_SELECT_COLUMNS = [
 ]
 
 const TRANSCRIBE_SELECT_COLUMNS = [
-  'created_on', 'created_by', 'from_number', 'to_number', 'duration_seconds', 'operator_score',
+  'id', 'created_on', 'created_by', 'from_number', 'to_number', 'duration_seconds', 'operator_score',
   'case_category', 'case_subcategory', 'case_operation_code', 'case_display', 'queue_display'
 ]
 
@@ -93,7 +94,8 @@ const PANEL_CONFIG = {
       { title: 'Підкатегорія', render: row => escapeHtml(getValue(row, ['case_subcategory', 'subcategory', 'case_sub_category'])) },
       { title: 'Код операції', render: row => escapeHtml(getValue(row, ['case_operation_code', 'operation_code'])) },
       { title: 'Кейс', render: row => escapeHtml(getValue(row, ['case_display', 'case_name', 'case'])) },
-      { title: 'Черга', render: row => escapeHtml(getValue(row, ['queue_display', 'queue', 'queue_name'])) }
+      { title: 'Черга', render: row => escapeHtml(getValue(row, ['queue_display', 'queue', 'queue_name'])) },
+      { title: 'Дія', render: row => renderTranscribeButton(row) }
     ]
   }
 }
@@ -380,6 +382,13 @@ els.columnsMenu.addEventListener('drop', (e) => {
 
 function renderTableHead() {
   const cols = getVisibleColumns()
+  const textColumnTitles = new Set([
+    config().firstTextTitle,
+    config().secondTextTitle,
+    'Raw транскрібація',
+    'Raw діалог',
+    'Результат'
+  ])
 
   let colgroup = els.qualityTable.querySelector('colgroup')
   if (!colgroup) {
@@ -388,7 +397,7 @@ function renderTableHead() {
   }
 
   colgroup.innerHTML = cols.map(item => {
-    const isTextCol = item.originalIndex >= config().columns.length - 2
+    const isTextCol = textColumnTitles.has(item.col.title)
     return `<col class="${isTextCol ? 'text-col' : 'fixed-col'}">`
   }).join('')
 
@@ -608,6 +617,17 @@ function renderOperatorScoreCell(row) {
   return `<span class="score-value">${escapeHtml(score)}</span>`
 }
 
+function renderTranscribeButton(row) {
+  const dialogId = getValue(row, ['id'])
+  if (!dialogId) return '<span class="score-value">—</span>'
+
+  return `
+    <button class="transcribe-btn" type="button" data-transcribe-id="${escapeHtml(dialogId)}">
+      Транскрибувати
+    </button>
+  `
+}
+
 function syncTopScrollbar() {
   const tableWidth = els.qualityTable.scrollWidth
   const containerWidth = els.tableWrap.clientWidth
@@ -792,6 +812,41 @@ els.tableBody.addEventListener('click', (e) => {
   textarea.innerHTML = btn.dataset.modalContent || ''
   openModal(btn.dataset.modalTitle || 'Деталі', btn.dataset.modalMeta || '', textarea.value)
 })
+
+els.tableBody.addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-transcribe-id]')
+  if (!btn) return
+
+  await transcribeDialog(btn)
+})
+
+async function transcribeDialog(btn) {
+  const dialogId = btn.dataset.transcribeId
+  if (!dialogId) return
+
+  const originalText = btn.textContent
+  btn.disabled = true
+  btn.textContent = 'Відправка...'
+  setStatus(`Відправка на транскрибування: ${dialogId}`)
+
+  try {
+    const response = await fetch(TRANSCRIBE_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dialog_ids: [dialogId] })
+    })
+
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+    btn.textContent = 'Відправлено'
+    setStatus(`Запис відправлено на транскрибування: ${dialogId}`)
+  } catch (err) {
+    console.error(err)
+    btn.disabled = false
+    btn.textContent = originalText
+    setStatus(`Помилка транскрибування: ${err.message}`, true)
+  }
+}
 
 function renderSummary(rows) {
   els.totalCount.textContent = rows.length
