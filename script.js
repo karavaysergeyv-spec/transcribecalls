@@ -97,6 +97,22 @@ const PANEL_CONFIG = {
       { title: 'Черга', render: row => escapeHtml(getValue(row, ['queue_display', 'queue', 'queue_name'])) },
       { title: 'Дія', render: row => renderTranscribeButton(row) }
     ]
+  },
+  analytics: {
+    view: 'calls_view',
+    title: 'Аналітика',
+    subtitle: 'Analytics Dashboard',
+    description: 'Динаміка дзвінків · оператори · якість · категорії',
+    searchPlaceholder: 'Номер, оператор, категорія, черга, транскрипція',
+    firstTextTitle: 'Raw транскрібація',
+    secondTextTitle: 'Результат',
+    textType: 'аналітика',
+    showFromCode: true,
+    endpointMode: 'calls',
+    selectColumns: CALLS_SELECT_COLUMNS,
+    defaultLimit: 500,
+    isAnalytics: true,
+    columns: []
   }
 }
 
@@ -139,14 +155,16 @@ const els = {
   callsPanelBtn: document.getElementById('callsPanelBtn'),
   chatsPanelBtn: document.getElementById('chatsPanelBtn'),
   transcribePanelBtn: document.getElementById('transcribePanelBtn'),
+  analyticsPanelBtn: document.getElementById('analyticsPanelBtn'),
   columnsBtn: document.getElementById('columnsBtn'),
   columnsMenu: document.getElementById('columnsMenu'),
-  exportExcelBtn: document.getElementById('exportExcelBtn')
+  exportExcelBtn: document.getElementById('exportExcelBtn'),
+  analyticsPanel: document.getElementById('analyticsPanel')
 }
 
 let activePanel = 'calls'
 let currentModalText = ''
-let operatorsLoadedByPanel = { calls: false, chats: false, transcribe: false }
+let operatorsLoadedByPanel = { calls: false, chats: false, transcribe: false, analytics: false }
 let scrollSyncLocked = false
 let currentRows = []
 
@@ -157,6 +175,7 @@ els.copyModalBtn.addEventListener('click', copyModalText)
 els.callsPanelBtn.addEventListener('click', () => switchPanel('calls'))
 els.chatsPanelBtn.addEventListener('click', () => switchPanel('chats'))
 els.transcribePanelBtn.addEventListener('click', () => switchPanel('transcribe'))
+els.analyticsPanelBtn.addEventListener('click', () => switchPanel('analytics'))
 els.columnsBtn.addEventListener('click', () => {
   els.columnsMenu.classList.toggle('hidden')
   renderColumnsMenu()
@@ -214,10 +233,12 @@ function clearCreatedBySelection() {
 function switchPanel(panel) {
   if (!PANEL_CONFIG[panel] || activePanel === panel) return
   activePanel = panel
+  currentRows = []
   operatorsLoadedByPanel[panel] = false
   els.callsPanelBtn.classList.toggle('active', panel === 'calls')
   els.chatsPanelBtn.classList.toggle('active', panel === 'chats')
   els.transcribePanelBtn.classList.toggle('active', panel === 'transcribe')
+  els.analyticsPanelBtn.classList.toggle('active', panel === 'analytics')
   resetFilters(false)
   applyPanelUi()
   loadRows()
@@ -225,8 +246,15 @@ function switchPanel(panel) {
 
 function applyPanelUi() {
   const cfg = config()
+  const isAnalytics = cfg.isAnalytics === true
   els.qualityTable.classList.toggle('calls-table', activePanel === 'calls')
   els.qualityTable.classList.toggle('chats-table', activePanel === 'chats')
+  els.analyticsPanel.classList.toggle('hidden', !isAnalytics)
+  els.tableWrap.classList.toggle('hidden', isAnalytics)
+  els.topScrollWrap.classList.toggle('hidden', isAnalytics)
+  els.columnsBtn.closest('.columns-control')?.classList.toggle('hidden', isAnalytics)
+  if (isAnalytics) els.columnsMenu.classList.add('hidden')
+  els.exportExcelBtn.classList.toggle('hidden', isAnalytics)
   document.title = cfg.title
   els.pageTitle.textContent = cfg.title
   els.pageDescription.textContent = cfg.description
@@ -243,6 +271,7 @@ function applyPanelUi() {
   els.correctFilter.disabled = !supportsCorrectness
   els.correctFilter.closest('.field')?.classList.toggle('hidden', !supportsCorrectness)
   renderTableHead()
+  if (isAnalytics) renderAnalytics(currentRows)
 }
 
 function columnStorageKey() {
@@ -425,7 +454,7 @@ function resetFilters(shouldLoad = true) {
   els.dateFrom.value = ''
   els.dateTo.value = ''
   els.correctFilter.value = ''
-  els.limitSelect.value = '50'
+  els.limitSelect.value = String(config().defaultLimit || 50)
   if (shouldLoad) loadRows()
 }
 
@@ -862,6 +891,280 @@ function renderSummary(rows) {
   els.correctPercent.classList.add(Number(percent) >= 70 ? 'score-good' : 'score-bad')
 }
 
+function getCorrectFlag(row) {
+  return normalizeCorrectValue(getValue(row, ['is_correct', 'correct']), getProcessedValue(row)) === 1
+}
+
+function getQualityRatio(row) {
+  const totalScore = extractTotalScore(getProcessedValue(row))
+  const maxScore = extractMaxScore(getProcessedValue(row))
+  return getScoreRatio(totalScore, maxScore)
+}
+
+function isLowQualityRow(row) {
+  const ratio = getQualityRatio(row)
+  if (ratio !== null) return ratio < 0.7
+
+  const score = getRowScore(row)
+  return score !== null && score < 7
+}
+
+function getAnalyticsDayKey(row) {
+  const value = getValue(row, ['created_on', 'created_at', 'date'])
+  if (!value) return 'Без дати'
+
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return String(value).slice(0, 10) || 'Без дати'
+
+  d.setHours(d.getHours() - 3)
+  return d.toISOString().slice(0, 10)
+}
+
+function formatDayLabel(dayKey) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(dayKey)) return dayKey
+  const [, month, day] = dayKey.split('-')
+  return `${day}.${month}`
+}
+
+function makeAnalyticsBucket(name) {
+  return {
+    name,
+    count: 0,
+    correctCount: 0,
+    lowCount: 0,
+    scoreSum: 0,
+    scoreCount: 0
+  }
+}
+
+function addRowToAnalyticsBucket(bucket, row) {
+  const score = getRowScore(row)
+  bucket.count += 1
+  if (getCorrectFlag(row)) bucket.correctCount += 1
+  if (isLowQualityRow(row)) bucket.lowCount += 1
+  if (score !== null) {
+    bucket.scoreSum += score
+    bucket.scoreCount += 1
+  }
+}
+
+function finishAnalyticsBucket(bucket) {
+  return {
+    ...bucket,
+    avgScore: bucket.scoreCount ? bucket.scoreSum / bucket.scoreCount : null,
+    correctRate: bucket.count ? bucket.correctCount / bucket.count : 0,
+    lowRate: bucket.count ? bucket.lowCount / bucket.count : 0
+  }
+}
+
+function addGroupedAnalyticsRow(map, key, row) {
+  const name = key || 'Без значення'
+  if (!map.has(name)) map.set(name, makeAnalyticsBucket(name))
+  addRowToAnalyticsBucket(map.get(name), row)
+}
+
+function formatMetric(value, digits = 1) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return '—'
+  return Number(value).toLocaleString('uk-UA', {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits
+  })
+}
+
+function formatWhole(value) {
+  return Number(value || 0).toLocaleString('uk-UA')
+}
+
+function formatRate(value) {
+  return `${formatMetric((value || 0) * 100, 1)}%`
+}
+
+function clampPercent(value) {
+  if (!Number.isFinite(value)) return 0
+  return Math.max(0, Math.min(100, value))
+}
+
+function buildAnalyticsModel(rows) {
+  const dayMap = new Map()
+  const operatorMap = new Map()
+  const categoryMap = new Map()
+  const queueMap = new Map()
+  const totals = makeAnalyticsBucket('Усього')
+
+  rows.forEach(row => {
+    addRowToAnalyticsBucket(totals, row)
+    addGroupedAnalyticsRow(dayMap, getAnalyticsDayKey(row), row)
+    addGroupedAnalyticsRow(operatorMap, getValue(row, ['created_by', 'operator', 'operator_name', 'agent_name']) || 'Без оператора', row)
+    addGroupedAnalyticsRow(categoryMap, getValue(row, ['case_category', 'category']) || 'Без категорії', row)
+    addGroupedAnalyticsRow(queueMap, getValue(row, ['queue_display', 'queue', 'queue_name']) || 'Без черги', row)
+  })
+
+  const byCount = (a, b) => b.count - a.count || a.name.localeCompare(b.name, 'uk')
+  const byDay = (a, b) => a.name.localeCompare(b.name)
+  const finalize = map => Array.from(map.values()).map(finishAnalyticsBucket)
+
+  return {
+    totals: finishAnalyticsBucket(totals),
+    days: finalize(dayMap).sort(byDay),
+    operators: finalize(operatorMap).sort(byCount),
+    categories: finalize(categoryMap).sort(byCount),
+    queues: finalize(queueMap).sort(byCount)
+  }
+}
+
+function renderAnalyticsMetric(label, value, hint, tone = '') {
+  return `
+    <div class="analytics-metric ${tone}">
+      <div class="analytics-metric-label">${escapeHtml(label)}</div>
+      <div class="analytics-metric-value">${escapeHtml(value)}</div>
+      <div class="analytics-metric-hint">${escapeHtml(hint)}</div>
+    </div>
+  `
+}
+
+function renderDailyChart(days) {
+  if (!days.length) return '<div class="analytics-empty">Немає даних для графіка</div>'
+
+  const visibleDays = days.slice(-21)
+  const maxCount = Math.max(...visibleDays.map(day => day.count), 1)
+
+  return `
+    <div class="daily-chart">
+      ${visibleDays.map(day => {
+        const height = clampPercent((day.count / maxCount) * 100)
+        const scoreLabel = day.avgScore === null ? '—' : formatMetric(day.avgScore, 1)
+        return `
+          <div class="daily-bar" title="${escapeHtml(`${day.name}: ${day.count} дзвінків, оцінка ${scoreLabel}`)}">
+            <div class="daily-bar-value">${escapeHtml(formatWhole(day.count))}</div>
+            <div class="daily-bar-track">
+              <div class="daily-bar-fill" style="height: ${height}%"></div>
+            </div>
+            <div class="daily-bar-rate">${escapeHtml(formatRate(day.correctRate))}</div>
+            <div class="daily-bar-label">${escapeHtml(formatDayLabel(day.name))}</div>
+          </div>
+        `
+      }).join('')}
+    </div>
+  `
+}
+
+function renderRankRows(items, options = {}) {
+  const {
+    limit = 8,
+    empty = 'Немає даних',
+    valueLabel = item => `${formatWhole(item.count)} дзв.`,
+    metaLabel = item => `Оцінка ${formatMetric(item.avgScore, 1)} · Коректність ${formatRate(item.correctRate)}`
+  } = options
+
+  const visibleItems = items.slice(0, limit)
+  if (!visibleItems.length) return `<div class="analytics-empty">${escapeHtml(empty)}</div>`
+
+  const maxCount = Math.max(...visibleItems.map(item => item.count), 1)
+
+  return `
+    <div class="analytics-rank-list">
+      ${visibleItems.map(item => `
+        <div class="analytics-rank-row">
+          <div class="analytics-row-head">
+            <strong>${escapeHtml(item.name)}</strong>
+            <span>${escapeHtml(valueLabel(item))}</span>
+          </div>
+          <div class="analytics-meter">
+            <span style="width: ${clampPercent((item.count / maxCount) * 100)}%"></span>
+          </div>
+          <div class="analytics-row-meta">${escapeHtml(metaLabel(item))}</div>
+        </div>
+      `).join('')}
+    </div>
+  `
+}
+
+function renderAnalyticsInsights(model) {
+  const operatorsWithLoad = model.operators.filter(item => item.count >= 3)
+  const bestOperator = [...operatorsWithLoad].sort((a, b) => b.correctRate - a.correctRate || (b.avgScore || 0) - (a.avgScore || 0))[0]
+  const riskOperator = [...operatorsWithLoad].sort((a, b) => b.lowRate - a.lowRate || a.correctRate - b.correctRate)[0]
+  const busiestDay = [...model.days].sort((a, b) => b.count - a.count)[0]
+  const topCategory = model.categories[0]
+
+  const insights = [
+    bestOperator ? `Найстабільніший оператор: ${bestOperator.name} (${formatRate(bestOperator.correctRate)} коректних).` : '',
+    riskOperator && riskOperator.lowCount ? `Зона уваги: ${riskOperator.name}, ${formatWhole(riskOperator.lowCount)} дзвінків з низькою якістю.` : '',
+    busiestDay ? `Найбільше навантаження було ${formatDayLabel(busiestDay.name)}: ${formatWhole(busiestDay.count)} дзвінків.` : '',
+    topCategory ? `Найчастіша категорія: ${topCategory.name} (${formatWhole(topCategory.count)} дзвінків).` : ''
+  ].filter(Boolean)
+
+  if (!insights.length) return '<div class="analytics-empty">Після завантаження даних тут зʼявляться короткі висновки.</div>'
+
+  return `
+    <div class="analytics-insights">
+      ${insights.map(text => `<div class="analytics-insight">${escapeHtml(text)}</div>`).join('')}
+    </div>
+  `
+}
+
+function renderAnalytics(rows) {
+  if (!els.analyticsPanel) return
+
+  const model = buildAnalyticsModel(rows || [])
+  const totals = model.totals
+
+  if (!totals.count) {
+    els.analyticsPanel.innerHTML = '<div class="analytics-empty analytics-empty-large">Немає даних для аналітики за поточними фільтрами</div>'
+    return
+  }
+
+  els.analyticsPanel.innerHTML = `
+    <div class="analytics-kpi-grid">
+      ${renderAnalyticsMetric('Дзвінків', formatWhole(totals.count), `Операторів: ${formatWhole(model.operators.length)}`, 'accent')}
+      ${renderAnalyticsMetric('Середня оцінка', formatMetric(totals.avgScore, 1), `Оцінено: ${formatWhole(totals.scoreCount)}`, '')}
+      ${renderAnalyticsMetric('Коректність', formatRate(totals.correctRate), `${formatWhole(totals.correctCount)} з ${formatWhole(totals.count)}`, totals.correctRate >= 0.7 ? 'good' : 'bad')}
+      ${renderAnalyticsMetric('Низька якість', formatWhole(totals.lowCount), `${formatRate(totals.lowRate)} від вибірки`, totals.lowRate > 0.2 ? 'bad' : '')}
+    </div>
+
+    <div class="analytics-grid">
+      <section class="analytics-section analytics-section-wide">
+        <div class="analytics-section-header">
+          <h2>Динаміка по днях</h2>
+          <span>Стовпчики: кількість дзвінків · підпис: коректність</span>
+        </div>
+        ${renderDailyChart(model.days)}
+      </section>
+
+      <section class="analytics-section">
+        <div class="analytics-section-header">
+          <h2>Короткі висновки</h2>
+          <span>Автоматично з поточної вибірки</span>
+        </div>
+        ${renderAnalyticsInsights(model)}
+      </section>
+
+      <section class="analytics-section">
+        <div class="analytics-section-header">
+          <h2>Оператори</h2>
+          <span>Топ за кількістю дзвінків</span>
+        </div>
+        ${renderRankRows(model.operators, { limit: 10 })}
+      </section>
+
+      <section class="analytics-section">
+        <div class="analytics-section-header">
+          <h2>Категорії</h2>
+          <span>Найчастіші теми звернень</span>
+        </div>
+        ${renderRankRows(model.categories, { limit: 8, empty: 'Категорії не заповнені' })}
+      </section>
+
+      <section class="analytics-section analytics-section-wide">
+        <div class="analytics-section-header">
+          <h2>Черги</h2>
+          <span>Обсяг і якість у розрізі черг</span>
+        </div>
+        ${renderRankRows(model.queues, { limit: 12, empty: 'Черги не заповнені' })}
+      </section>
+    </div>
+  `
+}
+
 function rowMatchesSearch(row, search) {
   return Object.values(row || {}).map(v => {
     if (v === null || v === undefined) return ''
@@ -932,13 +1235,22 @@ async function loadRows() {
     const data = await apiFetch(buildQuery())
     const rows = applyClientFilters(data || [])
     currentRows = rows
-    renderTable(rows)
+    if (config().isAnalytics === true) {
+      renderAnalytics(rows)
+    } else {
+      els.analyticsPanel.innerHTML = ''
+      renderTable(rows)
+    }
     renderSummary(rows)
     setStatus(`Завантажено записів: ${rows.length}`)
-    requestAnimationFrame(syncTopScrollbar)
+    if (config().isAnalytics !== true) requestAnimationFrame(syncTopScrollbar)
   } catch (err) {
     console.error(err)
-    renderTable([])
+    if (config().isAnalytics === true) {
+      renderAnalytics([])
+    } else {
+      renderTable([])
+    }
     renderSummary([])
     setStatus(`Помилка: ${err.message}`, true)
   }
@@ -978,6 +1290,11 @@ function setupResizableColumns() {
   })
 }
 function exportVisibleGridToExcel() {
+  if (config().isAnalytics === true) {
+    setStatus('Експорт доступний у табличних панелях', true)
+    return
+  }
+
   const cols = getVisibleColumns()
 
   if (!currentRows.length) {
